@@ -15,7 +15,6 @@ CLIENT_ID = os.environ.get("9f51e301cf594158b80107b2b4bf54ce")
 CLIENT_SECRET = os.environ.get("ff7a063fc03c4086a05f1a05f511fa40")
 REDIRECT_URI = os.environ.get("https://spotinaz-695626b39531.herokuapp.com/spotify_callback")
 
-
 # ⚡ Scope
 SCOPE = 'user-read-private user-read-email user-top-read user-read-currently-playing user-read-playback-state user-read-recently-played'
 
