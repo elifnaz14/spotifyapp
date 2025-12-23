@@ -31,11 +31,12 @@ SCOPE = (
 @app.route("/debug")
 def debug():
     return f"""
-    SECRET_KEY: {app.config["SECRET_KEY"]}<br>
+    SECRET_KEY: {app.config.get("SECRET_KEY")}<br>
     CLIENT_ID: {bool(CLIENT_ID)}<br>
     CLIENT_SECRET: {bool(CLIENT_SECRET)}<br>
     REDIRECT_URI: {REDIRECT_URI}
     """
+
 
 # =========================
 # LOGIN
