@@ -7,52 +7,35 @@ import datetime
 import os
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = os.environ.get("ba25b99ecf49effc559dc21a257d35631ad0429c73e09571a664f619c5347d99")  # <-- env'den okunuyor
 
-
-app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY")
-
-# 👇 BURAYA EKLE
+# 🔹 TEST LOGIN ROUTE
 @app.route("/test_login")
 def test_login():
     sp_oauth = SpotifyOAuth(
-        client_id=os.environ.get("SPOTIFY_CLIENT_ID"),
-        client_secret=os.environ.get("SPOTIFY_CLIENT_SECRET"),
-        redirect_uri=os.environ.get("SPOTIFY_REDIRECT_URI"),
-        scope="user-read-private user-read-recently-played user-top-read"
+        client_id=os.environ.get("9f51e301cf594158b80107b2b4bf54ce"),
+        client_secret=os.environ.get("ff7a063fc03c4086a05f1a05f511fa40"),
+        redirect_uri=os.environ.get("https://spotinaz-695626b39531.herokuapp.com/spotify_callback"),
+        scope='user-read-private user-read-email user-top-read user-read-currently-playing user-read-playback-state user-read-recently-played'
     )
     auth_url = sp_oauth.get_authorize_url()
     return redirect(auth_url)
 
-# diğer route'lar örnek:
-@app.route("/")
-def index():
-    return "Spotify Dashboard"
-
-
-
-
-# 🔐 SECRET KEY (env'den)
-app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("ba25b99ecf49effc559dc21a257d35631ad0429c73e09571a664f619c5347d99")
-
+# 🔹 DEBUG ROUTE (SECRET_KEY test için)
 @app.route("/debug")
 def debug():
     return str(app.config["SECRET_KEY"])
 
-CLIENT_ID = os.environ.get("9f51e301cf594158b80107b2b4bf54ce")
-CLIENT_SECRET = os.environ.get("ff7a063fc03c4086a05f1a05f511fa40")
-REDIRECT_URI = os.environ.get("https://spotinaz-695626b39531.herokuapp.com/spotify_callback")
-
 # ⚡ Scope
 SCOPE = 'user-read-private user-read-email user-top-read user-read-currently-playing user-read-playback-state user-read-recently-played'
 
+# 🔹 LOGIN ROUTE
 @app.route('/')
 def login():
     sp_oauth = SpotifyOAuth(
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        redirect_uri=REDIRECT_URI,
+        client_id=os.environ.get("CLIENT_ID"),
+        client_secret=os.environ.get("CLIENT_SECRET"),
+        redirect_uri=os.environ.get("REDIRECT_URI"),
         scope=SCOPE
     )
     auth_url = sp_oauth.get_authorize_url()
@@ -71,23 +54,22 @@ def login():
     </html>
     """, auth_url=auth_url)
 
+# 🔹 SPOTIFY CALLBACK
 @app.route('/spotify_callback')
 def spotify_callback():
     sp_oauth = SpotifyOAuth(
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        redirect_uri=REDIRECT_URI,
+        client_id=os.environ.get("CLIENT_ID"),
+        client_secret=os.environ.get("CLIENT_SECRET"),
+        redirect_uri=os.environ.get("REDIRECT_URI"),
         scope=SCOPE
     )
 
     code = request.args.get('code')
     token_info = sp_oauth.get_access_token(code)
-
     session['token_info'] = token_info
     return redirect(url_for('dashboard'))
 
-
-
+# 🔹 DASHBOARD
 @app.route('/dashboard')
 def dashboard():
     token_info = session.get('token_info', None)
@@ -218,6 +200,7 @@ def dashboard():
     pie_div=pie_div
     )
 
+# 🔹 RUN
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
