@@ -70,4 +70,49 @@ def spotify_callback():
 
     return redirect(url_for("dashboard"))
 
-# =====
+# =========================
+# DASHBOARD
+# =========================
+@app.route("/dashboard")
+def dashboard():
+    token_info = session.get("token_info")
+    if not token_info:
+        return redirect(url_for("login"))
+
+    sp = spotipy.Spotify(auth=token_info["access_token"])
+
+    user = sp.current_user()
+    display_name = user["display_name"]
+    email = user["email"]
+    profile_img = user["images"][0]["url"] if user["images"] else ""
+
+    top = sp.current_user_top_artists(limit=5)
+    names = [a["name"] for a in top["items"]]
+    pop = [a["popularity"] for a in top["items"]]
+
+    bar = plot(
+        go.Figure([go.Bar(x=names, y=pop)]),
+        output_type="div",
+        include_plotlyjs=False
+    )
+
+    return render_template_string("""
+    <html>
+    <head>
+      <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    </head>
+    <body style="background:#121212;color:white;font-family:sans-serif">
+      <h1>{{display_name}}</h1>
+      <p>{{email}}</p>
+      {% if profile_img %}<img src="{{profile_img}}" width="200">{% endif %}
+      {{bar|safe}}
+    </body>
+    </html>
+    """, display_name=display_name, email=email, profile_img=profile_img, bar=bar)
+
+# =========================
+# RUN
+# =========================
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
