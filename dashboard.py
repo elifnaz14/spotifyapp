@@ -9,7 +9,8 @@ import os
 app = Flask(__name__)
 
 # 🔐 SECRET KEY (env'den)
-aapp.secret_key = os.environ.get("ba25b99ecf49effc559dc21a257d35631ad0429c73e09571a664f619c5347d99")
+app.config["SECRET_KEY"] = os.environ.get("ba25b99ecf49effc559dc21a257d35631ad0429c73e09571a664f619c5347d99")
+
 
 CLIENT_ID = os.environ.get("9f51e301cf594158b80107b2b4bf54ce")
 CLIENT_SECRET = os.environ.get("ff7a063fc03c4086a05f1a05f511fa40")
