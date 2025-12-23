@@ -8,6 +8,30 @@ import os
 
 app = Flask(__name__)
 
+
+app = Flask(__name__)
+app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY")
+
+# 👇 BURAYA EKLE
+@app.route("/test_login")
+def test_login():
+    sp_oauth = SpotifyOAuth(
+        client_id=os.environ.get("SPOTIFY_CLIENT_ID"),
+        client_secret=os.environ.get("SPOTIFY_CLIENT_SECRET"),
+        redirect_uri=os.environ.get("SPOTIFY_REDIRECT_URI"),
+        scope="user-read-private user-read-recently-played user-top-read"
+    )
+    auth_url = sp_oauth.get_authorize_url()
+    return redirect(auth_url)
+
+# diğer route'lar örnek:
+@app.route("/")
+def index():
+    return "Spotify Dashboard"
+
+
+
+
 # 🔐 SECRET KEY (env'den)
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("ba25b99ecf49effc559dc21a257d35631ad0429c73e09571a664f619c5347d99")
