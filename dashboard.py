@@ -1,15 +1,15 @@
 from flask import Flask, redirect, request, render_template_string, session, url_for
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-import plotly.graph_objs as go
-from plotly.offline import plot
 import datetime
 import os
 
+# =========================
+# APP
+# =========================
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY")
 
-# ⚡ Spotify Credentials
 CLIENT_ID = os.environ.get("9f51e301cf594158b80107b2b4bf54ce")
 CLIENT_SECRET = os.environ.get("ff7a063fc03c4086a05f1a05f511fa40")
 REDIRECT_URI = os.environ.get("https://spotinaz-695626b39531.herokuapp.com/spotify_callback")
@@ -17,24 +17,9 @@ REDIRECT_URI = os.environ.get("https://spotinaz-695626b39531.herokuapp.com/spoti
 SCOPE = 'user-read-private user-read-email user-top-read user-read-currently-playing user-read-playback-state user-read-recently-played'
 
 # =========================
-# Helper: get Spotify client with refreshed token
+# ROUTES
 # =========================
-def get_spotify_client():
-    token_info = session.get("token_info", None)
-    sp_oauth = SpotifyOAuth(client_id=CLIENT_ID,
-                            client_secret=CLIENT_SECRET,
-                            redirect_uri=REDIRECT_URI,
-                            scope=SCOPE)
-    if token_info:
-        if sp_oauth.is_token_expired(token_info):
-            token_info = sp_oauth.refresh_access_token(token_info['refresh_token'])
-            session["token_info"] = token_info
-    return spotipy.Spotify(auth=token_info['access_token'] if token_info else None), token_info
-
-# =========================
-# Routes
-# =========================
-@app.route("/")
+@app.route('/')
 def login():
     sp_oauth = SpotifyOAuth(client_id=CLIENT_ID,
                             client_secret=CLIENT_SECRET,
@@ -56,49 +41,58 @@ def login():
     </html>
     """, auth_url=auth_url)
 
-@app.route("/spotify_callback")
+@app.route('/spotify_callback')
 def spotify_callback():
-    code = request.args.get("code")
     sp_oauth = SpotifyOAuth(client_id=CLIENT_ID,
                             client_secret=CLIENT_SECRET,
                             redirect_uri=REDIRECT_URI,
                             scope=SCOPE)
-    token_info = sp_oauth.get_access_token(code)
-    session["token_info"] = token_info
-    return redirect(url_for("dashboard"))
+    code = request.args.get('code')
+    token_info = sp_oauth.get_access_token(code, check_cache=False)
 
-@app.route("/dashboard")
-def dashboard():
-    sp, token_info = get_spotify_client()
+    # Token bilgisini session'a kaydet
+    session['token_info'] = token_info
+    return redirect(url_for('dashboard'))
+
+def get_spotify_client():
+    token_info = session.get('token_info', None)
     if not token_info:
-        return redirect(url_for("login"))
+        return None
 
-    # -------------------
-    # Kullanıcı Bilgileri
-    # -------------------
+    sp_oauth = SpotifyOAuth(client_id=CLIENT_ID,
+                            client_secret=CLIENT_SECRET,
+                            redirect_uri=REDIRECT_URI,
+                            scope=SCOPE)
+    # Token süresi dolmuşsa yenile
+    if sp_oauth.is_token_expired(token_info):
+        token_info = sp_oauth.refresh_access_token(token_info['refresh_token'])
+        session['token_info'] = token_info
+
+    sp = spotipy.Spotify(auth=token_info['access_token'])
+    return sp
+
+@app.route('/dashboard')
+def dashboard():
+    sp = get_spotify_client()
+    if not sp:
+        return redirect(url_for('login'))
+
     user = sp.current_user()
     display_name = user['display_name']
     email = user['email']
     profile_img = user['images'][0]['url'] if user['images'] else ''
 
-    # -------------------
+    # =========================
     # Top Artists
-    # -------------------
+    # =========================
     top_artists_data = sp.current_user_top_artists(limit=5, time_range='medium_term')
-    top_artists = []
-    artist_names = []
-    artist_popularity = []
+    artist_names = [artist['name'] for artist in top_artists_data['items']]
+    artist_imgs = [artist['images'][0]['url'] for artist in top_artists_data['items']]
+    artist_pairs = list(zip(artist_imgs, artist_names))
 
-    for artist in top_artists_data['items']:
-        top_artists.append(artist['images'][0]['url'])
-        artist_names.append(artist['name'])
-        artist_popularity.append(artist['popularity'])
-
-    artist_pairs = list(zip(top_artists, artist_names))
-
-    # -------------------
+    # =========================
     # Şu anda çalan
-    # -------------------
+    # =========================
     current_playing = sp.current_user_playing_track()
     if current_playing and current_playing.get("item"):
         track_name = current_playing['item']['name']
@@ -108,29 +102,30 @@ def dashboard():
         duration_ms = current_playing['item']['duration_ms']
         is_playing = current_playing['is_playing']
         progress_percent = int(progress_ms / duration_ms * 100)
-        now_playing_prefix = "Şu anda bunu dinliyorum:"
+        listened_time = str(datetime.timedelta(milliseconds=progress_ms))
     else:
         track_name = "Şu an çalan parça yok"
         track_artist = ""
         track_embed_url = ""
         progress_percent = 0
         is_playing = False
-        now_playing_prefix = ""
+        listened_time = "0:00"
 
-    # -------------------
-    # Top 10 parçalar
-    # -------------------
-    recent_tracks_data = sp.current_user_recently_played(limit=10)
-    recent_tracks = []
+    # =========================
+    # Bu haftanın top 10 parçaları
+    # =========================
+    recent_tracks_data = sp.current_user_top_tracks(limit=10, time_range='short_term')
+    top_tracks = []
     for item in recent_tracks_data['items']:
-        name = item['track']['name']
-        artist = item['track']['artists'][0]['name']
-        time_played = datetime.datetime.strptime(item['played_at'], "%Y-%m-%dT%H:%M:%S.%fZ")
-        recent_tracks.append((name, artist, time_played.strftime("%d %b %H:%M")))
+        name = item['name']
+        artist = item['artists'][0]['name']
+        duration_ms = item['duration_ms']
+        duration = str(datetime.timedelta(milliseconds=duration_ms))
+        top_tracks.append((name, artist, duration))
 
-    # -------------------
-    # HTML Render
-    # -------------------
+    # =========================
+    # Dashboard render
+    # =========================
     return render_template_string("""
     <html>
     <head>
@@ -140,24 +135,22 @@ def dashboard():
             .container {display:flex; flex-wrap:wrap; justify-content:center;margin-top:20px;}
             .card {background:#1e1e1e;border-radius:10px;padding:15px;margin:10px;width:250px;text-align:center;box-shadow:0 4px 8px rgba(0,0,0,0.3);}
             img {width:100%; border-radius:10px;}
-            table {width:100%; border-collapse: collapse; margin-top:10px;}
-            th, td {padding:8px; text-align:left; border-bottom:1px solid #333;}
-            iframe {border-radius:10px;}
+            table {width:100%; border-collapse:collapse;}
+            th, td {padding:8px;text-align:left;border-bottom:1px solid #333;}
         </style>
     </head>
     <body>
         <h1 style="text-align:center;background:linear-gradient(90deg,#1DB954,#1ed760);-webkit-background-clip:text;color:transparent;">
-            Spotify Dashboard
+            Spotify Dashboard of Elif Naz
         </h1>
+        <p style="text-align:center;">Çöplüğüme hoş geldin!</p>
         <div class="container">
-            <!-- Kullanıcı -->
             <div class="card">
                 <h2>{{display_name}}</h2>
                 <p>{{email}}</p>
                 {% if profile_img %}<img src="{{profile_img}}">{% endif %}
             </div>
 
-            <!-- Top Artists -->
             {% for artist_img, artist_name in artist_pairs %}
             <div class="card">
                 <img src="{{artist_img}}">
@@ -165,12 +158,12 @@ def dashboard():
             </div>
             {% endfor %}
 
-            <!-- Şu anda çalan -->
             <div class="card">
-                <h3>{{now_playing_prefix}}</h3>
+                <h3>Şu anda bunu dinliyorum</h3>
                 <p>{{track_name}} - {{track_artist}}</p>
+                <p>Dinlediğim süre: {{listened_time}}</p>
                 {% if track_embed_url %}
-                <iframe src="{{track_embed_url}}" width="300" height="80"></iframe>
+                <iframe src="{{track_embed_url}}" width="300" height="80" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
                 <div style="background:#333;border-radius:10px;">
                     <div style="background:#1DB954;width:{{progress_percent}}%;height:15px;border-radius:10px;"></div>
                 </div>
@@ -178,15 +171,12 @@ def dashboard():
                 {% endif %}
             </div>
 
-            <!-- Top 10 parçalar -->
-            <div class="card">
-                <h3>Bu hafta en çok dinlediğim parçalar</h3>
+            <div class="card" style="width:520px;">
+                <h3>Bu haftanın top 10 parçaları</h3>
                 <table>
-                    <tr><th>Parça</th><th>Sanatçı</th><th>Zaman</th></tr>
-                    {% for name, artist, time in recent_tracks %}
-                    <tr>
-                        <td>{{name}}</td><td>{{artist}}</td><td>{{time}}</td>
-                    </tr>
+                    <tr><th>Parça</th><th>Sanatçı</th><th>Süre</th></tr>
+                    {% for name, artist, duration in top_tracks %}
+                    <tr><td>{{name}}</td><td>{{artist}}</td><td>{{duration}}</td></tr>
                     {% endfor %}
                 </table>
             </div>
@@ -203,10 +193,13 @@ def dashboard():
     track_embed_url=track_embed_url,
     progress_percent=progress_percent,
     is_playing=is_playing,
-    now_playing_prefix=now_playing_prefix,
-    recent_tracks=recent_tracks
+    listened_time=listened_time,
+    top_tracks=top_tracks
     )
 
+# =========================
+# RUN
+# =========================
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
