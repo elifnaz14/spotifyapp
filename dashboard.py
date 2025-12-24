@@ -8,32 +8,34 @@ import os
 # APP
 # =========================
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY")
+app.config["SECRET_KEY"] = os.environ.get("FLASK_SECRET_KEY")  # Heroku'dan alacak
 
+# ⚡ Spotify Env
 CLIENT_ID = os.environ.get("9f51e301cf594158b80107b2b4bf54ce")
 CLIENT_SECRET = os.environ.get("ff7a063fc03c4086a05f1a05f511fa40")
 REDIRECT_URI = os.environ.get("https://spotinaz-695626b39531.herokuapp.com/spotify_callback")
 
-SCOPE = 'user-read-private user-read-email user-top-read user-read-currently-playing user-read-playback-state user-read-recently-played'
+SCOPE = "user-read-private user-read-email user-top-read user-read-currently-playing user-read-playback-state user-read-recently-played"
 
 # =========================
 # ROUTES
 # =========================
-@app.route('/')
+@app.route("/")
 def login():
     sp_oauth = SpotifyOAuth(client_id=CLIENT_ID,
                             client_secret=CLIENT_SECRET,
                             redirect_uri=REDIRECT_URI,
-                            scope=SCOPE)
+                            scope=SCOPE,
+                            cache_path=None)  # Heroku'da terminal input istemez
     auth_url = sp_oauth.get_authorize_url()
     return render_template_string("""
     <html>
     <head><title>Spotify Dashboard</title></head>
-    <body style="background:#121212;color:white;text-align:center;font-family:sans-serif;">
-        <h1>Spotify Dashboard of Elif Naz</h1>
-        <p>Çöplüğüme hoş geldin!</p>
+    <body style="background:#121212;color:white;font-family:sans-serif;text-align:center;">
+        <h1 style="color:#1DB954;">Spotify Dashboard of Elif Naz</h1>
+        <p style="color:#b3b3b3;">Çöplüğüme hoş geldin</p>
         <a href="{{auth_url}}">
-            <button style="padding:15px 30px;font-size:18px;background-color:#1DB954;border:none;border-radius:25px;color:white;cursor:pointer;">
+            <button style="padding:12px 25px;font-size:16px;background-color:#1DB954;border:none;border-radius:20px;color:white;cursor:pointer;">
                 Spotify ile Giriş Yap
             </button>
         </a>
@@ -41,90 +43,61 @@ def login():
     </html>
     """, auth_url=auth_url)
 
-@app.route('/spotify_callback')
+@app.route("/spotify_callback")
 def spotify_callback():
     sp_oauth = SpotifyOAuth(client_id=CLIENT_ID,
                             client_secret=CLIENT_SECRET,
                             redirect_uri=REDIRECT_URI,
-                            scope=SCOPE)
-    code = request.args.get('code')
+                            scope=SCOPE,
+                            cache_path=None)
+    code = request.args.get("code")
     token_info = sp_oauth.get_access_token(code, check_cache=False)
+    session["token_info"] = token_info
+    return redirect(url_for("dashboard"))
 
-    # Token bilgisini session'a kaydet
-    session['token_info'] = token_info
-    return redirect(url_for('dashboard'))
-
-def get_spotify_client():
-    token_info = session.get('token_info', None)
-    if not token_info:
-        return None
-
-    sp_oauth = SpotifyOAuth(client_id=CLIENT_ID,
-                            client_secret=CLIENT_SECRET,
-                            redirect_uri=REDIRECT_URI,
-                            scope=SCOPE)
-    # Token süresi dolmuşsa yenile
-    if sp_oauth.is_token_expired(token_info):
-        token_info = sp_oauth.refresh_access_token(token_info['refresh_token'])
-        session['token_info'] = token_info
-
-    sp = spotipy.Spotify(auth=token_info['access_token'])
-    return sp
-
-@app.route('/dashboard')
+@app.route("/dashboard")
 def dashboard():
-    sp = get_spotify_client()
-    if not sp:
-        return redirect(url_for('login'))
+    token_info = session.get("token_info")
+    if not token_info:
+        return redirect(url_for("login"))
 
-    user = sp.current_user()
-    display_name = user['display_name']
-    email = user['email']
-    profile_img = user['images'][0]['url'] if user['images'] else ''
+    sp = spotipy.Spotify(auth=token_info["access_token"])
+
+    # =========================
+    # Şu anda çalan parça
+    # =========================
+    current_playing = sp.current_user_playing_track()
+    if current_playing and current_playing.get("item"):
+        track_name = current_playing["item"]["name"]
+        track_artist = current_playing["item"]["artists"][0]["name"]
+        track_embed = f"https://open.spotify.com/embed/track/{current_playing['item']['id']}"
+        progress_ms = current_playing["progress_ms"]
+        duration_ms = current_playing["item"]["duration_ms"]
+        progress_min_sec = f"{int(progress_ms/60000)}:{int((progress_ms%60000)/1000):02d}"
+        duration_min_sec = f"{int(duration_ms/60000)}:{int((duration_ms%60000)/1000):02d}"
+        now_playing_text = f"Şu anda bunu dinliyorum: {track_name} - {track_artist}"
+    else:
+        track_name = ""
+        track_artist = ""
+        track_embed = ""
+        progress_min_sec = "0:00"
+        duration_min_sec = "0:00"
+        now_playing_text = "Şu anda çalan parça yok"
 
     # =========================
     # Top Artists
     # =========================
-    top_artists_data = sp.current_user_top_artists(limit=5, time_range='medium_term')
-    artist_names = [artist['name'] for artist in top_artists_data['items']]
-    artist_imgs = [artist['images'][0]['url'] for artist in top_artists_data['items']]
-    artist_pairs = list(zip(artist_imgs, artist_names))
+    top_artists_data = sp.current_user_top_artists(limit=10, time_range="medium_term")
+    top_artists = [artist["name"] for artist in top_artists_data["items"]]
 
     # =========================
-    # Şu anda çalan
+    # Top Songs
     # =========================
-    current_playing = sp.current_user_playing_track()
-    if current_playing and current_playing.get("item"):
-        track_name = current_playing['item']['name']
-        track_artist = current_playing['item']['artists'][0]['name']
-        track_embed_url = f"https://open.spotify.com/embed/track/{current_playing['item']['id']}"
-        progress_ms = current_playing['progress_ms']
-        duration_ms = current_playing['item']['duration_ms']
-        is_playing = current_playing['is_playing']
-        progress_percent = int(progress_ms / duration_ms * 100)
-        listened_time = str(datetime.timedelta(milliseconds=progress_ms))
-    else:
-        track_name = "Şu an çalan parça yok"
-        track_artist = ""
-        track_embed_url = ""
-        progress_percent = 0
-        is_playing = False
-        listened_time = "0:00"
+    top_tracks_data = sp.current_user_top_tracks(limit=10, time_range="medium_term")
+    top_tracks = [(track["name"], track["artists"][0]["name"]) for track in top_tracks_data["items"]]
 
     # =========================
-    # Bu haftanın top 10 parçaları
-    # =========================
-    recent_tracks_data = sp.current_user_top_tracks(limit=10, time_range='short_term')
-    top_tracks = []
-    for item in recent_tracks_data['items']:
-        name = item['name']
-        artist = item['artists'][0]['name']
-        duration_ms = item['duration_ms']
-        duration = str(datetime.timedelta(milliseconds=duration_ms))
-        top_tracks.append((name, artist, duration))
-
-    # =========================
-    # Dashboard render
+    # Dashboard HTML
     # =========================
     return render_template_string("""
     <html>
@@ -132,70 +105,48 @@ def dashboard():
         <title>Spotify Dashboard</title>
         <style>
             body {background:#121212;color:white;font-family:sans-serif;margin:0;padding:0;}
-            .container {display:flex; flex-wrap:wrap; justify-content:center;margin-top:20px;}
-            .card {background:#1e1e1e;border-radius:10px;padding:15px;margin:10px;width:250px;text-align:center;box-shadow:0 4px 8px rgba(0,0,0,0.3);}
-            img {width:100%; border-radius:10px;}
-            table {width:100%; border-collapse:collapse;}
-            th, td {padding:8px;text-align:left;border-bottom:1px solid #333;}
+            .container {max-width:700px;margin:auto;padding:20px;}
+            h1 {color:#1DB954;text-align:center;}
+            p.subtitle {color:#b3b3b3;text-align:center;}
+            h2 {border-bottom:1px solid #333;padding-bottom:5px;}
+            ul {list-style:none;padding-left:0;}
+            li {padding:4px 0;}
+            .track {margin:15px 0;padding:10px;background:#1e1e1e;border-radius:10px;}
+            iframe {border:none;border-radius:10px;width:100%;height:80px;}
         </style>
     </head>
     <body>
-        <h1 style="text-align:center;background:linear-gradient(90deg,#1DB954,#1ed760);-webkit-background-clip:text;color:transparent;">
-            Spotify Dashboard of Elif Naz
-        </h1>
-        <p style="text-align:center;">Çöplüğüme hoş geldin!</p>
         <div class="container">
-            <div class="card">
-                <h2>{{display_name}}</h2>
-                <p>{{email}}</p>
-                {% if profile_img %}<img src="{{profile_img}}">{% endif %}
-            </div>
+            <h1>Spotify Dashboard of Elif Naz</h1>
+            <p class="subtitle">Çöplüğüme hoş geldin</p>
 
-            {% for artist_img, artist_name in artist_pairs %}
-            <div class="card">
-                <img src="{{artist_img}}">
-                <h3>{{artist_name}}</h3>
-            </div>
-            {% endfor %}
-
-            <div class="card">
-                <h3>Şu anda bunu dinliyorum</h3>
-                <p>{{track_name}} - {{track_artist}}</p>
-                <p>Dinlediğim süre: {{listened_time}}</p>
-                {% if track_embed_url %}
-                <iframe src="{{track_embed_url}}" width="300" height="80" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
-                <div style="background:#333;border-radius:10px;">
-                    <div style="background:#1DB954;width:{{progress_percent}}%;height:15px;border-radius:10px;"></div>
-                </div>
-                <p>{{'Çalıyor' if is_playing else 'Duraklatıldı'}}</p>
+            <h2>Şu Anda Çalan Parça</h2>
+            <div class="track">
+                <p>{{now_playing_text}}</p>
+                {% if track_embed %}
+                <iframe src="{{track_embed}}" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+                <p>Dinleme süresi: {{progress_min_sec}} / {{duration_min_sec}}</p>
                 {% endif %}
             </div>
 
-            <div class="card" style="width:520px;">
-                <h3>Bu haftanın top 10 parçaları</h3>
-                <table>
-                    <tr><th>Parça</th><th>Sanatçı</th><th>Süre</th></tr>
-                    {% for name, artist, duration in top_tracks %}
-                    <tr><td>{{name}}</td><td>{{artist}}</td><td>{{duration}}</td></tr>
-                    {% endfor %}
-                </table>
-            </div>
+            <h2>Top Artists</h2>
+            <ul>
+            {% for artist in top_artists %}
+                <li>{{artist}}</li>
+            {% endfor %}
+            </ul>
+
+            <h2>Bu Haftanın Top 10 Parçaları</h2>
+            <ul>
+            {% for name, artist in top_tracks %}
+                <li>{{name}} - {{artist}}</li>
+            {% endfor %}
+            </ul>
         </div>
     </body>
     </html>
-    """,
-    display_name=display_name,
-    email=email,
-    profile_img=profile_img,
-    artist_pairs=artist_pairs,
-    track_name=track_name,
-    track_artist=track_artist,
-    track_embed_url=track_embed_url,
-    progress_percent=progress_percent,
-    is_playing=is_playing,
-    listened_time=listened_time,
-    top_tracks=top_tracks
-    )
+    """, top_artists=top_artists, top_tracks=top_tracks, track_embed=track_embed,
+         now_playing_text=now_playing_text, progress_min_sec=progress_min_sec, duration_min_sec=duration_min_sec)
 
 # =========================
 # RUN
