@@ -147,19 +147,6 @@ def dashboard():
         daily_avg=daily_avg
     )
 
-# ---------------------
-# CALLBACK (TOKEN ALMA – GEÇİCİ)
-# ---------------------
-@app.route("/spotify_callback")
-def spotify_callback():
-    code = request.args.get("code")
-    token_info = auth_manager.get_access_token(code)
-    return f"""
-    <h1>REFRESH TOKEN</h1>
-    <p>{token_info['refresh_token']}</p>
-    <p>Bunu Heroku Config Vars'a ekle:
-    SPOTIFY_REFRESH_TOKEN</p>
-    """
 
 # ---------------------
 if __name__ == "__main__":
