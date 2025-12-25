@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string, request
+from flask import Flask, render_template_string
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import os
@@ -8,34 +8,26 @@ app = Flask(__name__)
 # ---------------------
 # Spotify API setup
 # ---------------------
-CLIENT_ID = os.environ.get("9f51e301cf594158b80107b2b4bf54ce")          # sen dolduracaksın
-CLIENT_SECRET = os.environ.get("ff7a063fc03c4086a05f1a05f511fa40")  # sen dolduracaksın
+CLIENT_ID = os.environ.get("9f51e301cf594158b80107b2b4bf54ce")
+CLIENT_SECRET = os.environ.get("ff7a063fc03c4086a05f1a05f511fa40")
 REDIRECT_URI = "https://spotinaz-695626b39531.herokuapp.com/spotify_callback"
-REFRESH_TOKEN = os.environ.get("SPOTIFY_REFRESH_TOKEN")
 
 SCOPE = "user-read-recently-played user-top-read user-read-playback-state"
 
-# OAuth manager
 auth_manager = SpotifyOAuth(
     client_id=CLIENT_ID,
     client_secret=CLIENT_SECRET,
     redirect_uri=REDIRECT_URI,
     scope=SCOPE,
-    open_browser=False
+    cache_path=".spotifycache"   # <<< KRİTİK SATIR
 )
 
-# Eğer refresh token VARSA Spotify client oluştur
-sp = None
-if REFRESH_TOKEN:
-    token_info = auth_manager.refresh_access_token(REFRESH_TOKEN)
-    sp = spotipy.Spotify(auth=token_info["access_token"])
+sp = spotipy.Spotify(auth_manager=auth_manager)
 
 # ---------------------
 # Helper functions
 # ---------------------
 def get_current_track():
-    if not sp:
-        return "Token yok", "", ""
     try:
         current = sp.current_playback()
         if current and current.get("item"):
@@ -50,8 +42,6 @@ def get_current_track():
     return "Şu anda çalan parça yok", "", ""
 
 def get_top_artists(limit=5):
-    if not sp:
-        return []
     try:
         data = sp.current_user_top_artists(limit=limit, time_range="short_term")
         return [(i + 1, a["name"]) for i, a in enumerate(data["items"])]
@@ -59,8 +49,6 @@ def get_top_artists(limit=5):
         return []
 
 def get_top_tracks(limit=10):
-    if not sp:
-        return []
     try:
         data = sp.current_user_top_tracks(limit=limit, time_range="short_term")
         return [(i + 1, t["name"]) for i, t in enumerate(data["items"])]
@@ -146,7 +134,6 @@ def dashboard():
         top_tracks=top_tracks,
         daily_avg=daily_avg
     )
-
 
 # ---------------------
 if __name__ == "__main__":
