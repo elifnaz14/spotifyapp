@@ -14,24 +14,24 @@ REFRESH_TOKEN = os.environ.get("SPOTIFY_REFRESH_TOKEN")
 
 SCOPE = "user-read-recently-played user-top-read user-read-playback-state"
 
-# OAuth manager (browser / cache YOK)
 auth_manager = SpotifyOAuth(
     client_id=CLIENT_ID,
     client_secret=CLIENT_SECRET,
-    redirect_uri="http://localhost/",  # kullanılmayacak ama zorunlu
+    redirect_uri="http://localhost/",  # kullanılmıyor ama zorunlu
     scope=SCOPE
 )
 
-# access token üret
-token_info = auth_manager.refresh_access_token(REFRESH_TOKEN)
-
-sp = spotipy.Spotify(auth=token_info["access_token"])
+# 🔴 KRİTİK FONKSİYON
+def get_spotify_client():
+    token_info = auth_manager.refresh_access_token(REFRESH_TOKEN)
+    return spotipy.Spotify(auth=token_info["access_token"])
 
 # ---------------------
 # Helper functions
 # ---------------------
 def get_current_track():
     try:
+        sp = get_spotify_client()
         current = sp.current_playback()
         if current and current.get("item"):
             track = current["item"]
@@ -42,10 +42,12 @@ def get_current_track():
             )
     except:
         pass
-    return "Şu anda çalan parça yok", "", ""
+    return "Şu anda enteresan bir şekilde bir şey dinlemiyorum", "", ""
+
 
 def get_top_artists(limit=5):
     try:
+        sp = get_spotify_client()
         data = sp.current_user_top_artists(limit=limit, time_range="short_term")
         return [(i + 1, a["name"]) for i, a in enumerate(data["items"])]
     except:
@@ -53,11 +55,11 @@ def get_top_artists(limit=5):
 
 def get_top_tracks(limit=10):
     try:
+        sp = get_spotify_client()
         data = sp.current_user_top_tracks(limit=limit, time_range="short_term")
         return [(i + 1, t["name"]) for i, t in enumerate(data["items"])]
     except:
         return []
-
 
 # ---------------------
 # Routes
@@ -67,7 +69,6 @@ def dashboard():
     track_name, track_artist, track_embed = get_current_track()
     top_artists = get_top_artists()
     top_tracks = get_top_tracks()
-
 
     html = """
     <html>
@@ -121,6 +122,7 @@ def dashboard():
     </body>
     </html>
     """
+
     return render_template_string(
         html,
         track_name=track_name,
