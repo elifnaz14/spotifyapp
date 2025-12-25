@@ -1,7 +1,6 @@
 from flask import Flask, render_template_string
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from spotipy.cache_handler import MemoryCacheHandler
 import os
 
 app = Flask(__name__)
@@ -11,19 +10,22 @@ app = Flask(__name__)
 # ---------------------
 CLIENT_ID = os.environ.get("9f51e301cf594158b80107b2b4bf54ce")
 CLIENT_SECRET = os.environ.get("ff7a063fc03c4086a05f1a05f511fa40")
-REDIRECT_URI = "https://spotinaz-695626b39531.herokuapp.com/spotify_callback"
+REFRESH_TOKEN = os.environ.get("SPOTIFY_REFRESH_TOKEN")
 
 SCOPE = "user-read-recently-played user-top-read user-read-playback-state"
 
+# OAuth manager (browser / cache YOK)
 auth_manager = SpotifyOAuth(
     client_id=CLIENT_ID,
     client_secret=CLIENT_SECRET,
-    redirect_uri=REDIRECT_URI,
-    scope=SCOPE,
-    cache_handler=MemoryCacheHandler()  # <<< TEK VE KRİTİK DÜZELTME
+    redirect_uri="http://localhost/",  # kullanılmayacak ama zorunlu
+    scope=SCOPE
 )
 
-sp = spotipy.Spotify(auth_manager=auth_manager)
+# access token üret
+token_info = auth_manager.refresh_access_token(REFRESH_TOKEN)
+
+sp = spotipy.Spotify(auth=token_info["access_token"])
 
 # ---------------------
 # Helper functions
