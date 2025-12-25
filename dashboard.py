@@ -1,6 +1,7 @@
 from flask import Flask, render_template_string
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from spotipy.cache_handler import MemoryCacheHandler
 import os
 
 app = Flask(__name__)
@@ -19,7 +20,7 @@ auth_manager = SpotifyOAuth(
     client_secret=CLIENT_SECRET,
     redirect_uri=REDIRECT_URI,
     scope=SCOPE,
-    cache_path=".spotifycache"   # <<< KRİTİK SATIR
+    cache_handler=MemoryCacheHandler()  # <<< TEK VE KRİTİK DÜZELTME
 )
 
 sp = spotipy.Spotify(auth_manager=auth_manager)
