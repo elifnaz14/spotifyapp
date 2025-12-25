@@ -1,7 +1,6 @@
-from flask import Flask, render_template_string
+from flask import Flask, render_template_string, request
 import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
-import datetime
+from spotipy.oauth2 import SpotifyOAuth
 import os
 
 app = Flask(__name__)
@@ -9,44 +8,66 @@ app = Flask(__name__)
 # ---------------------
 # Spotify API setup
 # ---------------------
-CLIENT_ID = os.environ.get("9f51e301cf594158b80107b2b4bf54ce")
-CLIENT_SECRET = os.environ.get("ff7a063fc03c4086a05f1a05f511fa40")
+CLIENT_ID = os.environ.get("9f51e301cf594158b80107b2b4bf54ce")          # sen dolduracaksın
+CLIENT_SECRET = os.environ.get("ff7a063fc03c4086a05f1a05f511fa40")  # sen dolduracaksın
+REDIRECT_URI = "https://spotinaz-695626b39531.herokuapp.com/spotify_callback"
+REFRESH_TOKEN = os.environ.get("SPOTIFY_REFRESH_TOKEN")
 
-auth_manager = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
-sp = spotipy.Spotify(auth_manager=auth_manager)
+SCOPE = "user-read-recently-played user-top-read user-read-playback-state"
+
+# OAuth manager
+auth_manager = SpotifyOAuth(
+    client_id=CLIENT_ID,
+    client_secret=CLIENT_SECRET,
+    redirect_uri=REDIRECT_URI,
+    scope=SCOPE,
+    open_browser=False
+)
+
+# Eğer refresh token VARSA Spotify client oluştur
+sp = None
+if REFRESH_TOKEN:
+    token_info = auth_manager.refresh_access_token(REFRESH_TOKEN)
+    sp = spotipy.Spotify(auth=token_info["access_token"])
 
 # ---------------------
 # Helper functions
 # ---------------------
 def get_current_track():
+    if not sp:
+        return "Token yok", "", ""
     try:
-        currently_playing = sp.current_user_playing_track()
-        if currently_playing and currently_playing.get("item"):
-            track = currently_playing['item']
-            track_name = track['name']
-            track_artist = track['artists'][0]['name']
-            track_embed = f"https://open.spotify.com/embed/track/{track['id']}"
-            return track_name, track_artist, track_embed
+        current = sp.current_playback()
+        if current and current.get("item"):
+            track = current["item"]
+            return (
+                track["name"],
+                track["artists"][0]["name"],
+                f"https://open.spotify.com/embed/track/{track['id']}"
+            )
     except:
         pass
     return "Şu anda çalan parça yok", "", ""
 
 def get_top_artists(limit=5):
+    if not sp:
+        return []
     try:
-        data = sp.current_user_top_artists(limit=limit, time_range='short_term')
-        return [(i+1, artist['name']) for i, artist in enumerate(data['items'])]
+        data = sp.current_user_top_artists(limit=limit, time_range="short_term")
+        return [(i + 1, a["name"]) for i, a in enumerate(data["items"])]
     except:
         return []
 
 def get_top_tracks(limit=10):
+    if not sp:
+        return []
     try:
-        data = sp.current_user_top_tracks(limit=limit, time_range='short_term')
-        return [(i+1, track['name']) for i, track in enumerate(data['items'])]
+        data = sp.current_user_top_tracks(limit=limit, time_range="short_term")
+        return [(i + 1, t["name"]) for i, t in enumerate(data["items"])]
     except:
         return []
 
 def get_daily_average_listening():
-    # örnek değer, Spotify API bu bilgiyi direkt vermez
     return "2 saat 45 dakika"
 
 # ---------------------
@@ -62,45 +83,49 @@ def dashboard():
     html = """
     <html>
     <head>
-        <title>Spotify Dashboard</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Spotify Dashboard</title>
         <style>
-            body {background:#121212;color:white;font-family:sans-serif;margin:0;padding:0;}
-            h1,h2,h3 {margin:10px 0;}
-            .container {padding:20px; max-width:600px; margin:auto;}
-            .card {background:#1e1e1e;margin:10px 0;padding:15px;border-radius:10px;box-shadow:0 4px 8px rgba(0,0,0,0.3);}
-            table {width:100%; border-collapse: collapse;}
-            td {padding:5px 10px;}
+            body { background:#121212; color:white; font-family:sans-serif; margin:0 }
+            .container { max-width:600px; margin:auto; padding:20px }
+            .card { background:#1e1e1e; margin:12px 0; padding:15px;
+                    border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,.3) }
+            table { width:100% }
+            td { padding:4px }
         </style>
     </head>
     <body>
         <div class="container">
-            <h1 style="background:linear-gradient(90deg,#1DB954,#1ed760);-webkit-background-clip:text;color:transparent;">Spotify Dashboard of Elif Naz</h1>
+            <h1 style="background:linear-gradient(90deg,#1DB954,#1ed760);
+                       -webkit-background-clip:text;color:transparent;">
+                Spotify Dashboard of Elif Naz
+            </h1>
             <p>Çöplüğüme hoş geldin</p>
 
             <div class="card">
                 <h2>Şu anda çalıyor</h2>
-                <p>{{track_name}} - {{track_artist}}</p>
+                <p>{{track_name}} {{track_artist}}</p>
                 {% if track_embed %}
-                <iframe src="{{track_embed}}" width="100%" height="80" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+                <iframe src="{{track_embed}}" width="100%" height="80"
+                        frameborder="0" allow="encrypted-media"></iframe>
                 {% endif %}
             </div>
 
             <div class="card">
-                <h2>Top 5 Artists (son 1 hafta)</h2>
+                <h2>Top 5 Artists</h2>
                 <table>
-                    {% for num, artist in top_artists %}
-                    <tr><td>{{num}}.</td><td>{{artist}}</td></tr>
-                    {% endfor %}
+                {% for n, a in top_artists %}
+                    <tr><td>{{n}}.</td><td>{{a}}</td></tr>
+                {% endfor %}
                 </table>
             </div>
 
             <div class="card">
-                <h2>Top 10 Songs (son 1 hafta)</h2>
+                <h2>Top 10 Songs</h2>
                 <table>
-                    {% for num, track in top_tracks %}
-                    <tr><td>{{num}}.</td><td>{{track}}</td></tr>
-                    {% endfor %}
+                {% for n, t in top_tracks %}
+                    <tr><td>{{n}}.</td><td>{{t}}</td></tr>
+                {% endfor %}
                 </table>
             </div>
 
@@ -112,14 +137,31 @@ def dashboard():
     </body>
     </html>
     """
-    return render_template_string(html,
-                                  track_name=track_name,
-                                  track_artist=track_artist,
-                                  track_embed=track_embed,
-                                  top_artists=top_artists,
-                                  top_tracks=top_tracks,
-                                  daily_avg=daily_avg)
+    return render_template_string(
+        html,
+        track_name=track_name,
+        track_artist=track_artist,
+        track_embed=track_embed,
+        top_artists=top_artists,
+        top_tracks=top_tracks,
+        daily_avg=daily_avg
+    )
 
+# ---------------------
+# CALLBACK (TOKEN ALMA – GEÇİCİ)
+# ---------------------
+@app.route("/spotify_callback")
+def spotify_callback():
+    code = request.args.get("code")
+    token_info = auth_manager.get_access_token(code)
+    return f"""
+    <h1>REFRESH TOKEN</h1>
+    <p>{token_info['refresh_token']}</p>
+    <p>Bunu Heroku Config Vars'a ekle:
+    SPOTIFY_REFRESH_TOKEN</p>
+    """
+
+# ---------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
