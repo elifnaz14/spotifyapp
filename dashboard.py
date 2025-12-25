@@ -58,8 +58,6 @@ def get_top_tracks(limit=10):
     except:
         return []
 
-def get_daily_average_listening():
-    return "2 saat 45 dakika"
 
 # ---------------------
 # Routes
@@ -69,7 +67,7 @@ def dashboard():
     track_name, track_artist, track_embed = get_current_track()
     top_artists = get_top_artists()
     top_tracks = get_top_tracks()
-    daily_avg = get_daily_average_listening()
+
 
     html = """
     <html>
@@ -119,11 +117,6 @@ def dashboard():
                 {% endfor %}
                 </table>
             </div>
-
-            <div class="card">
-                <h2>Günlük Ortalama Dinleme Süresi</h2>
-                <p>{{daily_avg}}</p>
-            </div>
         </div>
     </body>
     </html>
@@ -135,7 +128,6 @@ def dashboard():
         track_embed=track_embed,
         top_artists=top_artists,
         top_tracks=top_tracks,
-        daily_avg=daily_avg
     )
 
 # ---------------------
