@@ -42,7 +42,7 @@ def get_current_track():
             )
     except:
         pass
-    return "Şu anda enteresan bir şekilde bir şey dinlemiyorum", "", ""
+    return "saka yaptim dinlemiyorum", "", ""
 
 
 def get_top_artists(limit=5):
@@ -90,10 +90,14 @@ def dashboard():
                        -webkit-background-clip:text;color:transparent;">
                 Spotify Dashboard of Elif Naz
             </h1>
-            <p>Çöplüğüme hoş geldin</p>
+            <p style="font-style: italic; font-size: 1.1em;">
+                vsco but make it spotify
+            </p>
+            <p>haftalık veri anlık cekiliyor, olabildigince</p>
+            <p>embed hata veriyorsa local/unlisted dinliyorumdur</p>
 
             <div class="card">
-                <h2>Şu anda çalıyor</h2>
+                <h2>Şu anda bunu dinliyorum:</h2>
                 <p>{{track_name}} {{track_artist}}</p>
                 {% if track_embed %}
                 <iframe src="{{track_embed}}" width="100%" height="80"
