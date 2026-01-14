@@ -5,9 +5,6 @@ import os
 
 app = Flask(__name__)
 
-# ---------------------
-# Spotify API setup
-# ---------------------
 CLIENT_ID = os.environ.get("9f51e301cf594158b80107b2b4bf54ce")
 CLIENT_SECRET = os.environ.get("ff7a063fc03c4086a05f1a05f511fa40")
 REFRESH_TOKEN = os.environ.get("SPOTIFY_REFRESH_TOKEN")
@@ -17,18 +14,14 @@ SCOPE = "user-read-recently-played user-top-read user-read-playback-state"
 auth_manager = SpotifyOAuth(
     client_id=CLIENT_ID,
     client_secret=CLIENT_SECRET,
-    redirect_uri="http://localhost/",  # kullanılmıyor ama zorunlu
+    redirect_uri="http://localhost/", 
     scope=SCOPE
 )
 
-# 🔴 KRİTİK FONKSİYON
 def get_spotify_client():
     token_info = auth_manager.refresh_access_token(REFRESH_TOKEN)
     return spotipy.Spotify(auth=token_info["access_token"])
 
-# ---------------------
-# Helper functions
-# ---------------------
 def get_current_track():
     try:
         sp = get_spotify_client()
@@ -61,9 +54,6 @@ def get_top_tracks(limit=10):
     except:
         return []
 
-# ---------------------
-# Routes
-# ---------------------
 @app.route("/")
 def dashboard():
     track_name, track_artist, track_embed = get_current_track()
@@ -82,6 +72,28 @@ def dashboard():
                     border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,.3) }
             table { width:100% }
             td { padding:4px }
+            .profile-link {
+                color: #1DB954;
+                text-decoration: none;
+                font-weight: 500;
+            }
+
+            .profile-link:hover {
+                text-decoration: underline;
+            }
+            .desc {
+                margin: 3px 0;
+                font-size: 12.5px;
+                line-height: 1.35;
+                color: #cfcfcf;
+            }
+            @media (max-width: 480px) {
+                h1 {
+                    font-size: 1.6em;
+                    line-height: 1.2;
+                }
+            }
+
         </style>
     </head>
     <body>
@@ -90,11 +102,20 @@ def dashboard():
                        -webkit-background-clip:text;color:transparent;">
                 Spotify Dashboard of Elif Naz
             </h1>
+
             <p style="font-style: italic; font-size: 1.1em;">
                 vsco but make it spotify
             </p>
-            <p>haftalık veri anlık cekiliyor, olabildigince</p>
-            <p>embed hata veriyorsa local/unlisted dinliyorumdur</p>
+            <p style="margin-top:10px; font-size:14px; opacity:0.85;">
+                <a href="https://open.spotify.com/user/yk69xlqfyypx701kxqnbhb3v4"
+                    target="_blank"
+                    class="profile-link"
+                    title="spotify profilim">
+                    Spotify profilim
+                </a>
+            </p>
+            <p class="desc">haftalık veri anlık cekiliyor, olabildigince</p>
+            <p class="desc">embed hata veriyorsa local/unlisted dinliyorumdur</p>
 
             <div class="card">
                 <h2>Şu anda bunu dinliyorum:</h2>
@@ -136,7 +157,6 @@ def dashboard():
         top_tracks=top_tracks,
     )
 
-# ---------------------
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
