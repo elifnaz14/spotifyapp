@@ -99,7 +99,13 @@ def dashboard():
                     font-size: 1.45em;
                 }
             }
-
+            .footer {
+                margin-top: 40px;
+                text-align: center;
+                font-size: 11px;
+                color: #9a9a9a;
+                opacity: 0.6;
+            }
         </style>
     </head>
     <body>
@@ -149,6 +155,9 @@ def dashboard():
                     <tr><td>{{n}}.</td><td>{{t}}</td></tr>
                 {% endfor %}
                 </table>
+            </div>
+            <div class="footer">
+                made for fun, provides none • spotinaz.com
             </div>
         </div>
     </body>
