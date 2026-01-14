@@ -87,10 +87,16 @@ def dashboard():
                 line-height: 1.35;
                 color: #cfcfcf;
             }
+            .title {
+                font-size: 1.9em;
+                line-height: 1.15;
+                margin-bottom: 6px;
+                letter-spacing: -0.5px;
+            }
+
             @media (max-width: 480px) {
-                h1 {
-                    font-size: 1.6em;
-                    line-height: 1.2;
+                .title {
+                    font-size: 1.45em;
                 }
             }
 
@@ -98,10 +104,11 @@ def dashboard():
     </head>
     <body>
         <div class="container">
-            <h1 style="background:linear-gradient(90deg,#1DB954,#1ed760);
-                       -webkit-background-clip:text;color:transparent;">
+            <h1 class="title" style="background:linear-gradient(90deg,#1DB954,#1ed760);
+                -webkit-background-clip:text;color:transparent;">
                 Spotify Dashboard of Elif Naz
-            </h1>
+        </h1>
+
 
             <p style="font-style: italic; font-size: 1.1em;">
                 vsco but make it spotify
@@ -111,7 +118,7 @@ def dashboard():
                     target="_blank"
                     class="profile-link"
                     title="spotify profilim">
-                    Spotify profilim
+                    spotify profilim
                 </a>
             </p>
             <p class="desc">haftalık veri anlık cekiliyor, olabildigince</p>
