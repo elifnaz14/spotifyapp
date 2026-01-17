@@ -25,6 +25,7 @@ def get_current_track():
     try:
         sp = get_spotify_client()
         current = sp.current_playback()
+
         if current and current.get("item"):
             track = current["item"]
             return (
@@ -33,21 +34,23 @@ def get_current_track():
                 f"https://open.spotify.com/embed/track/{track['id']}"
             )
         else:
-            return (
-                '<span style="font-family:sans-serif; font-size:0.95em; opacity:0.7;">not listening rn, but maybe </span>'
-                '<a href="https://lichess-damage-report-f5e4b5271a78.herokuapp.com" target="_blank" '
-                'style="color:#1DB954; font-weight:500;">playing</a>',
-                "",
-                ""
+            html_message = (
+                '<span style="font-family:sans-serif; font-size:0.95em; opacity:0.7;">'
+                'not listening rn, but maybe </span>'
+                '<a href="https://lichess-damage-report-f5e4b5271a78.herokuapp.com" '
+                'target="_blank" style="color:#1DB954; font-weight:500; text-decoration:underline;">'
+                'playing</a>'
             )
+            return html_message, "", ""
+
     except Exception as e:
         print("Hata oluştu:", e)
-        return (
+        error_message = (
             '<span style="font-family:monospace; font-size:0.95em; opacity:0.7;">'
-            "if you're seeing this the app is screwed up so please let me know :(</span>",
-            "",
-            ""
+            "if you're seeing this the app is screwed up so please let me know :(</span>"
         )
+        return error_message, "", ""
+
 
 
 
