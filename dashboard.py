@@ -185,21 +185,7 @@ def dashboard():
             </p>
             <p class="desc">haftalık veri anlık cekiliyor, olabildigince</p>
             <p class="desc">embed hata veriyorsa local/unlisted dinliyorumdur</p>
-            <div class="card">
-                <button onclick="this.nextElementSibling.classList.toggle('hidden')" 
-                    style="background:#1DB954;color:#121212;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;">
-                read me
-            </button>
-            <div class="hidden" style="margin-top:10px; font-size:0.95em; line-height:1.4;">
-                <p>vsco but make it spotify — burada kısa açıklama yazabilirsin.</p>
-                <p>spotify profilim: <a href="https://open.spotify.com/user/yk69xlqfyypx701kxqnbhb3v4" 
-                    target="_blank" style="color:#1DB954;">spotify profilim</a></p>
-            .hidden {
-                display: none;
-            }
-            </div>
-        </div>
-        
+
             <div class="card hero">
                 <h2>Currently Playing</h2>
                 <p>{{track_name}} {{track_artist}}</p>
