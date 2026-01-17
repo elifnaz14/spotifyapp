@@ -106,6 +106,10 @@ def dashboard():
             .container { max-width:600px; margin:auto; padding:20px }
             .card { background:#1e1e1e; margin:12px 0; padding:15px;
                     border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,.3) }
+            .card.hero {
+                    border: 1px solid rgba(255,255,255,0.25);
+                    transform: scale(1.02);
+            }
             table { width:100% }
             td { padding:4px }
             .profile-link {
@@ -166,8 +170,8 @@ def dashboard():
             <p class="desc">haftalık veri anlık cekiliyor, olabildigince</p>
             <p class="desc">embed hata veriyorsa local/unlisted dinliyorumdur</p>
 
-            <div class="card">
-                <h2>Şu anda bunu dinliyorum:</h2>
+            <div class="card hero">
+                <h2>Currently Playing</h2>
                 <p>{{track_name}} {{track_artist}}</p>
                 {% if track_embed %}
                 <iframe src="{{track_embed}}" width="100%" height="80"
@@ -190,7 +194,7 @@ def dashboard():
             <div class="card">
                 <h2>Top 10 Songs</h2>
                 <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px;">
-                    most listened this week - short term (4 weeks)
+                    most listened - short term (4 weeks)
                 </p>
                 <table>
                 {% for n, t in top_tracks %}
