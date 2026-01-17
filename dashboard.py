@@ -2,6 +2,7 @@ from flask import Flask, render_template_string
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -53,6 +54,31 @@ def get_top_tracks(limit=10):
         return [(i + 1, t["name"]) for i, t in enumerate(data["items"])]
     except:
         return []
+
+def get_recent_tracks(limit=5):
+    try:
+        sp = get_spotify_client()
+        data = sp.current_user_recently_played(limit=limit)
+
+        tracks = []
+        for i, item in enumerate(data["items"]):
+            played_at = item["played_at"]  # ISO string
+            time_str = datetime.fromisoformat(
+                played_at.replace("Z", "+00:00")
+            ).strftime("%H:%M")
+
+            tracks.append((
+                i + 1,
+                item["track"]["name"],
+                item["track"]["artists"][0]["name"],
+                time_str
+            ))
+
+        return tracks
+    except Exception as e:
+        print("recent error:", e)
+        return []
+
 
 @app.route("/")
 def dashboard():
@@ -156,6 +182,21 @@ def dashboard():
                 {% endfor %}
                 </table>
             </div>
+            <div class="card">
+                <h2>Recently Played</h2>
+                <table>
+                {% for n, t, a, time in recent_tracks %}
+                    <tr>
+                        <td>{{n}}.</td>
+                        <td>
+                            {{t}} – <span style="opacity:0.7">{{a}}</span><br>
+                            <span style="font-size:11px; opacity:0.5;">{{time}}</span>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </table>
+            </div>
+
             <div class="footer">
                 made for fun, provides none • spotinaz.com
             </div>
