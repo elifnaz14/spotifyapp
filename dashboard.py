@@ -21,10 +21,6 @@ auth_manager = SpotifyOAuth(
     scope=SCOPE
 )
 
-def get_spotify_client():
-    token_info = auth_manager.refresh_access_token(REFRESH_TOKEN)
-    return spotipy.Spotify(auth=token_info["access_token"])
-
 def get_current_track():
     try:
         sp = get_spotify_client()
@@ -36,9 +32,23 @@ def get_current_track():
                 track["artists"][0]["name"],
                 f"https://open.spotify.com/embed/track/{track['id']}"
             )
-    except:
-        pass
-    return "saka yaptim dinlemiyorum", "", ""
+        else:
+            return (
+                '<span style="font-family:sans-serif; font-size:0.95em; opacity:0.7;">not listening rn, but maybe </span>'
+                '<a href="https://lichess-damage-report-f5e4b5271a78.herokuapp.com" target="_blank" '
+                'style="color:#1DB954; font-weight:500;">playing</a>',
+                "",
+                ""
+            )
+    except Exception as e:
+        print("Hata oluştu:", e)
+        return (
+            '<span style="font-family:monospace; font-size:0.95em; opacity:0.7;">'
+            "if you're seeing this the app is screwed up so please let me know :(</span>",
+            "",
+            ""
+        )
+
 
 
 def get_top_artists(limit=5):
@@ -217,8 +227,8 @@ def dashboard():
         <p class="desc">embed hata veriyorsa local/unlisted dinliyorumdur</p>
 
         <div class="card hero">
-            <h2>Currently Playing</h2>
-            <p>{{track_name}} {{track_artist}}</p>
+            <h2>Currently Listening</h2>
+            <p>{{ track_name|safe }} {{ track_artist }}</p>
             {% if track_embed %}
             <iframe src="{{track_embed}}" width="100%" height="80"
                     frameborder="0" allow="encrypted-media"></iframe>
