@@ -165,7 +165,7 @@ def dashboard():
             .readme-card {
                 cursor: pointer;
                 overflow: hidden;
-                border-radius: 12px;
+                border-radius: 16px;
                 box-shadow: 0 2px 6px rgba(0,0,0,0.15);
                 background: rgba(255,255,255,0.05);
                 transition: all 0.3s ease;
@@ -173,7 +173,7 @@ def dashboard():
             }
 
             .readme-header {
-                font-weight: 400;
+                font-weight: 700;
                 font-size: 0.95em;
                 padding: 10px 14px;
                 text-align: center;
@@ -181,6 +181,7 @@ def dashboard():
                 color: #e0e0e0;
                 border-bottom: 1px solid rgba(255,255,255,0.1);
                 background: rgba(255,255,255,0.02);
+                border-radius: 16px 16px 0 0;
                 transition: background 0.3s ease;
             }
             .readme-card:hover .readme-header {
@@ -266,7 +267,7 @@ def dashboard():
         </div>
 
         <div class="card readme-card">
-            <div class="readme-header">öylesine linler</div>
+            <div class="readme-header">alakasız linkler</div>
             <div class="readme-content">
                 <p><a href="https://strava.app.link/yP1KWcOj0Zb" target="_blank" style="color:#1DB954;">strava</a></p>
                 <p><a href="https://open.spotify.com/user/yk69xlqfyypx701kxqnbhb3v4" target="_blank" style="color:#1DB954;">spotify</a></p>
