@@ -106,6 +106,13 @@ def dashboard():
             .container { max-width:600px; margin:auto; padding:20px }
             .card { background:#1e1e1e; margin:12px 0; padding:15px;
                     border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,.3) }
+            .card h2 {
+                font-size: 0.75rem;
+                letter-spacing: 1px;
+                opacity: 0.6;
+                margin-bottom: 6px;
+                text-transform: uppercase;
+            }
             .card.hero {
                     border: 1px solid rgba(255,255,255,0.25);
                     transform: scale(1.02);
