@@ -165,30 +165,40 @@ def dashboard():
             .readme-card {
                 cursor: pointer;
                 overflow: hidden;
+                border-radius: 12px;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                background: rgba(255,255,255,0.05);
                 transition: all 0.3s ease;
+                border: 1px solid rgba(255,255,255,0.1);
             }
 
             .readme-header {
-                font-weight: 500;
-                font-size: 1em;
-                padding: 12px;
-                background: #1DB954;
-                color: #121212;
-                border-radius: 10px;
+                font-weight: 400;
+                font-size: 0.95em;
+                padding: 10px 14px;
                 text-align: center;
                 user-select: none;
+                color: #e0e0e0;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
+                background: rgba(255,255,255,0.02);
+                transition: background 0.3s ease;
             }
-
+            .readme-card:hover .readme-header {
+                background: rgba(255,255,255,0.05);
+    }
             .readme-content {
                 max-height: 0;
                 opacity: 0;
-                padding: 0 12px;
+                padding: 0 14px;
                 transition: max-height 0.35s ease, opacity 0.35s ease, padding 0.35s ease;
+                font-size: 0.9em;
+                color: #dcdcdc;
+                line-height: 1.45;
             }
             .readme-card.active .readme-content {
                 max-height: 500px;
                 opacity: 1;
-                padding: 12px;
+                padding: 12px 14px;
             }
         </style>
     </head>
@@ -202,7 +212,7 @@ def dashboard():
         <p style="font-style: italic; font-size: 1.1em;">
             vsco but make it spotify
         </p>
-        <p class="desc">haftalık veri anlık cekiliyor, olabildigince</p>
+        <p class="desc">short term veri anlık cekiliyor, olabildigince</p>
         <p class="desc">embed hata veriyorsa local/unlisted dinliyorumdur</p>
 
         <div class="card hero">
@@ -254,13 +264,12 @@ def dashboard():
             {% endfor %}
             </table>
         </div>
-        
+
         <div class="card readme-card">
             <div class="readme-header">öylesine linler</div>
             <div class="readme-content">
                 <p><a href="https://strava.app.link/yP1KWcOj0Zb" target="_blank" style="color:#1DB954;">strava</a></p>
                 <p><a href="https://open.spotify.com/user/yk69xlqfyypx701kxqnbhb3v4" target="_blank" style="color:#1DB954;">spotify</a></p>
-                <p><a href="https://lichess-damage-report-f5e4b5271a78.herokuapp.com" target="_blank" style="color:#1DB954;">lichess</a></p>
                 <p><a href="https://lichess-damage-report-f5e4b5271a78.herokuapp.com" target="_blank" style="color:#1DB954;">lichess</a></p>
                 <p><a href="https://www.linkedin.com/in/elif-naz-mutlu-634915216/" target="_blank" style="color:#1DB954;">linkedin</a></p>
                 <p><a href="https://github.com/elifnaz14" target="_blank" style="color:#1DB954;">github</a></p>
