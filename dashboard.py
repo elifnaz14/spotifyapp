@@ -20,6 +20,9 @@ auth_manager = SpotifyOAuth(
     redirect_uri="http://localhost/", 
     scope=SCOPE
 )
+def get_spotify_client():
+    token_info = auth_manager.refresh_access_token(REFRESH_TOKEN)
+    return spotipy.Spotify(auth=token_info["access_token"])
 
 def get_current_track():
     sp = get_spotify_client()
@@ -41,6 +44,7 @@ def get_current_track():
             'playing</a>'
         )
         return html_message, "", ""
+
 
 
 
