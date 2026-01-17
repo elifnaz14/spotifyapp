@@ -104,7 +104,7 @@ def dashboard():
         <style>
             body { background:#121212; color:white; font-family:sans-serif; margin:0 }
             .container { max-width:600px; margin:auto; padding:20px }
-            .card { background:#1e1e1e; margin:12px 0; padding:15px;
+            .card { background:#1e1e1e; margin:24px 0; padding:24px;
                     border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,.3) }
             .card h2 {
                 font-size: 0.75rem;
@@ -219,8 +219,8 @@ def dashboard():
                     <tr>
                         <td>{{n}}.</td>
                         <td>
-                            {{t}} – <span style="opacity:0.7">{{a}}</span><br>
-                            <span style="font-size:11px; opacity:0.5;">{{time}}</span>
+                            {{t}} – <span class="secondary">{{a}}</span>
+                            <span class="meta">{{time}}</span>
                         </td>
                     </tr>
                 {% endfor %}
@@ -235,6 +235,13 @@ def dashboard():
             ">
                 last updated · {{ last_updated }}
             </p>
+            .meta {
+                font-size: 11px;
+                opacity: 0.5;
+            }
+            .secondary {
+                opacity: 0.7;
+            }
             <div class="footer">
                 made for fun, provides none • spotinaz.com
             </div>
