@@ -199,32 +199,8 @@ def dashboard():
             Spotify Dashboard of Elif Naz
         </h1>
 
-        <div class="card readme-card">
-            <div class="readme-header">read me</div>
-            <div class="readme-content">
-                <p>vsco but make it spotify</p>
-                <p>short term spotify verisi anlık cekiliyor, olabildigince. bir de currently playing kısmındaki embed düzgün çalışmıyorsa muhtemelen local/unlisted dinliyorumdur.</p>
-                <p>alakasız linkler:</p>
-                <p>strava: <a href="https://strava.app.link/yP1KWcOj0Zb" target="_blank" style="color:#1DB954;">strava</a></p>
-                <p>spotify profilim: <a href="https://open.spotify.com/user/yk69xlqfyypx701kxqnbhb3v4" target="_blank" style="color:#1DB954;">spotify</a></p>
-                <p>lichessle ilgili bir şey: <a href="https://lichess-damage-report-f5e4b5271a78.herokuapp.com" target="_blank" style="color:#1DB954;">lichess</a></p>
-                <p>lichessle ilgili bir şey: <a href="https://lichess-damage-report-f5e4b5271a78.herokuapp.com" target="_blank" style="color:#1DB954;">lichess</a></p>
-                <p>linkedin <a href="https://www.linkedin.com/in/elif-naz-mutlu-634915216/" target="_blank" style="color:#1DB954;">linkedin</a></p>
-                <p>github <a href="https://github.com/elifnaz14" target="_blank" style="color:#1DB954;">github</a></p>
-            </div>
-
-        </div>
-
         <p style="font-style: italic; font-size: 1.1em;">
             vsco but make it spotify
-        </p>
-        <p style="margin-top:10px; font-size:14px; opacity:0.85;">
-            <a href="https://open.spotify.com/user/yk69xlqfyypx701kxqnbhb3v4"
-                target="_blank"
-                class="profile-link"
-                title="spotify profilim">
-                spotify profilim
-            </a>
         </p>
         <p class="desc">haftalık veri anlık cekiliyor, olabildigince</p>
         <p class="desc">embed hata veriyorsa local/unlisted dinliyorumdur</p>
@@ -277,6 +253,18 @@ def dashboard():
                 </tr>
             {% endfor %}
             </table>
+        </div>
+        
+        <div class="card readme-card">
+            <div class="readme-header">öylesine linler</div>
+            <div class="readme-content">
+                <p><a href="https://strava.app.link/yP1KWcOj0Zb" target="_blank" style="color:#1DB954;">strava</a></p>
+                <p><a href="https://open.spotify.com/user/yk69xlqfyypx701kxqnbhb3v4" target="_blank" style="color:#1DB954;">spotify</a></p>
+                <p><a href="https://lichess-damage-report-f5e4b5271a78.herokuapp.com" target="_blank" style="color:#1DB954;">lichess</a></p>
+                <p><a href="https://lichess-damage-report-f5e4b5271a78.herokuapp.com" target="_blank" style="color:#1DB954;">lichess</a></p>
+                <p><a href="https://www.linkedin.com/in/elif-naz-mutlu-634915216/" target="_blank" style="color:#1DB954;">linkedin</a></p>
+                <p><a href="https://github.com/elifnaz14" target="_blank" style="color:#1DB954;">github</a></p>
+            </div>
         </div>
 
         <p style="
