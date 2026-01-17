@@ -25,31 +25,13 @@ def get_current_track():
     try:
         sp = get_spotify_client()
         current = sp.current_playback()
-
         if current and current.get("item"):
             track = current["item"]
-            return (
-                track["name"],
-                track["artists"][0]["name"],
-                f"https://open.spotify.com/embed/track/{track['id']}"
-            )
+            return track["name"], track["artists"][0]["name"], f"https://open.spotify.com/embed/track/{track['id']}"
         else:
-            html_message = (
-                '<span style="font-family:sans-serif; font-size:0.95em; opacity:0.7;">'
-                'not listening rn, but maybe </span>'
-                '<a href="https://lichess-damage-report-f5e4b5271a78.herokuapp.com" '
-                'target="_blank" style="color:#1DB954; font-weight:500; text-decoration:underline;">'
-                'playing</a>'
-            )
-            return html_message, "", ""
-
-    except Exception as e:
-        print("Hata oluştu:", e)
-        error_message = (
-            '<span style="font-family:monospace; font-size:0.95em; opacity:0.7;">'
-            "if you're seeing this the app is screwed up so please let me know :(</span>"
-        )
-        return error_message, "", ""
+            return "", "", ""  
+    except:
+        return "", "", ""  
 
 
 
@@ -230,11 +212,19 @@ def dashboard():
         <p class="desc">embed hata veriyorsa local/unlisted dinliyorumdur</p>
 
         <div class="card hero">
-            <h2>Currently Listening</h2>
-            <p>{{ track_name|safe }} {{ track_artist }}</p>
+            <h2>Currently Playing</h2>
             {% if track_embed %}
-            <iframe src="{{track_embed}}" width="100%" height="80"
-                    frameborder="0" allow="encrypted-media"></iframe>
+                <iframe src="{{track_embed}}" width="100%" height="80"
+                        frameborder="0" allow="encrypted-media"></iframe>
+            {% else %}
+                <p style="font-family:sans-serif; font-size:0.95em; opacity:0.7; margin:0;">
+                    not listening rn, but maybe
+                    <a href="https://lichess-damage-report-f5e4b5271a78.herokuapp.com"
+                    target="_blank"
+                    style="color:#1DB954; font-weight:500; text-decoration:underline;">
+                    playing
+                    </a>
+                </p>
             {% endif %}
         </div>
 
