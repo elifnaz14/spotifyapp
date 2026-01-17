@@ -82,7 +82,6 @@ def get_recent_tracks(limit=5):
         print("recent error:", e)
         return []
 
-
 @app.route("/")
 def dashboard():
     track_name, track_artist, track_embed = get_current_track()
@@ -196,6 +195,9 @@ def dashboard():
                     last 5 listens
                 </p>
                 <table>
+                <p style="font-size:11px; opacity:0.6;">
+                    debug count: {{ recent_tracks|length }}
+                </p>
                 {% for n, t, a, time in recent_tracks %}
                     <tr>
                         <td>{{n}}.</td>
