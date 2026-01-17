@@ -102,7 +102,7 @@ def dashboard():
     <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Spotify Dashboard</title>
+        <title>Spotify Dashboard of Elif Naz</title>
         <style>
             body { background:#121212; color:white; font-family:sans-serif; margin:0 }
             .container { max-width:600px; margin:auto; padding:20px }
@@ -162,93 +162,148 @@ def dashboard():
                 color: #9a9a9a;
                 opacity: 0.6;
             }
+            .readme-card {
+                cursor: pointer;
+                overflow: hidden;
+                transition: all 0.3s ease;
+            }
+
+            .readme-header {
+                font-weight: 500;
+                font-size: 1em;
+                padding: 12px;
+                background: #1DB954;
+                color: #121212;
+                border-radius: 10px;
+                text-align: center;
+                user-select: none;
+            }
+
+            .readme-content {
+                max-height: 0;
+                opacity: 0;
+                padding: 0 12px;
+                transition: max-height 0.35s ease, opacity 0.35s ease, padding 0.35s ease;
+            }
+            .readme-card.active .readme-content {
+                max-height: 500px;
+                opacity: 1;
+                padding: 12px;
+            }
         </style>
     </head>
     <body>
-        <div class="container">
-            <h1 class="title" style="background:linear-gradient(90deg,#1DB954,#1ed760);
-                -webkit-background-clip:text;color:transparent;">
-                Spotify Dashboard of Elif Naz
+    <div class="container">
+        <h1 class="title" style="background:linear-gradient(90deg,#1DB954,#1ed760);
+            -webkit-background-clip:text;color:transparent;">
+            Spotify Dashboard of Elif Naz
         </h1>
 
-
-            <p style="font-style: italic; font-size: 1.1em;">
-                vsco but make it spotify
-            </p>
-            <p style="margin-top:10px; font-size:14px; opacity:0.85;">
-                <a href="https://open.spotify.com/user/yk69xlqfyypx701kxqnbhb3v4"
-                    target="_blank"
-                    class="profile-link"
-                    title="spotify profilim">
-                    spotify profilim
-                </a>
-            </p>
-            <p class="desc">haftalık veri anlık cekiliyor, olabildigince</p>
-            <p class="desc">embed hata veriyorsa local/unlisted dinliyorumdur</p>
-
-            <div class="card hero">
-                <h2>Currently Playing</h2>
-                <p>{{track_name}} {{track_artist}}</p>
-                {% if track_embed %}
-                <iframe src="{{track_embed}}" width="100%" height="80"
-                        frameborder="0" allow="encrypted-media"></iframe>
-                {% endif %}
+        <div class="card readme-card">
+            <div class="readme-header">read me</div>
+            <div class="readme-content">
+                <p>vsco but make it spotify</p>
+                <p>short term spotify verisi anlık cekiliyor, olabildigince. bir de currently playing kısmındaki embed düzgün çalışmıyorsa muhtemelen local/unlisted dinliyorumdur.</p>
+                <p>alakasız linkler:</p>
+                <p>strava: <a href="https://strava.app.link/yP1KWcOj0Zb" target="_blank" style="color:#1DB954;">strava</a></p>
+                <p>spotify profilim: <a href="https://open.spotify.com/user/yk69xlqfyypx701kxqnbhb3v4" target="_blank" style="color:#1DB954;">spotify</a></p>
+                <p>lichessle ilgili bir şey: <a href="https://lichess-damage-report-f5e4b5271a78.herokuapp.com" target="_blank" style="color:#1DB954;">lichess</a></p>
+                <p>lichessle ilgili bir şey: <a href="https://lichess-damage-report-f5e4b5271a78.herokuapp.com" target="_blank" style="color:#1DB954;">lichess</a></p>
+                <p>linkedin <a href="https://www.linkedin.com/in/elif-naz-mutlu-634915216/" target="_blank" style="color:#1DB954;">linkedin</a></p>
+                <p>github <a href="https://github.com/elifnaz14" target="_blank" style="color:#1DB954;">github</a></p>
             </div>
 
-            <div class="card">
-                <h2>Top 5 Artists</h2>
-                <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px;">
-                    most listened - short term (4 weeks)
-                </p>
-                <table>
-                {% for n, a in top_artists %}
-                    <tr><td>{{n}}.</td><td>{{a}}</td></tr>
-                {% endfor %}
-                </table>
-            </div>
-
-            <div class="card">
-                <h2>Top 10 Songs</h2>
-                <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px;">
-                    most listened - short term (4 weeks)
-                </p>
-                <table>
-                {% for n, t in top_tracks %}
-                    <tr><td>{{n}}.</td><td>{{t}}</td></tr>
-                {% endfor %}
-                </table>
-            </div>
-            <div class="card">
-                <h2>Recently Played</h2>
-                <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px;">
-                    last 5 listens
-                </p>
-                <table>
-                {% for n, t, a, time in recent_tracks %}
-                    <tr>
-                        <td>{{n}}.</td>
-                        <td>
-                            {{t}} – <span class="secondary">{{a}}</span>
-                            <span class="meta">{{time}}</span>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </table>
-            </div>
-            <p style="
-                text-align:center;
-                font-size:11px;
-                color:#9a9a9a;
-                opacity:0.6;
-                margin-top:20px;
-            ">
-                last updated · {{ last_updated }}
-            </p>
-            <div class="footer">
-                made for fun, provides none • spotinaz.com
-            </div>
         </div>
-    </body>
+
+        <p style="font-style: italic; font-size: 1.1em;">
+            vsco but make it spotify
+        </p>
+        <p style="margin-top:10px; font-size:14px; opacity:0.85;">
+            <a href="https://open.spotify.com/user/yk69xlqfyypx701kxqnbhb3v4"
+                target="_blank"
+                class="profile-link"
+                title="spotify profilim">
+                spotify profilim
+            </a>
+        </p>
+        <p class="desc">haftalık veri anlık cekiliyor, olabildigince</p>
+        <p class="desc">embed hata veriyorsa local/unlisted dinliyorumdur</p>
+
+        <div class="card hero">
+            <h2>Currently Playing</h2>
+            <p>{{track_name}} {{track_artist}}</p>
+            {% if track_embed %}
+            <iframe src="{{track_embed}}" width="100%" height="80"
+                    frameborder="0" allow="encrypted-media"></iframe>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h2>Top 5 Artists</h2>
+            <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px;">
+                most listened - short term (4 weeks)
+            </p>
+            <table>
+            {% for n, a in top_artists %}
+                <tr><td>{{n}}.</td><td>{{a}}</td></tr>
+            {% endfor %}
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Top 10 Songs</h2>
+            <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px;">
+                most listened - short term (4 weeks)
+            </p>
+            <table>
+            {% for n, t in top_tracks %}
+                <tr><td>{{n}}.</td><td>{{t}}</td></tr>
+            {% endfor %}
+            </table>
+        </div>
+        <div class="card">
+            <h2>Recently Played</h2>
+            <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px;">
+                last 5 listens
+            </p>
+            <table>
+            {% for n, t, a, time in recent_tracks %}
+                <tr>
+                    <td>{{n}}.</td>
+                    <td>
+                        {{t}} – <span class="secondary">{{a}}</span>
+                        <span class="meta">{{time}}</span>
+                    </td>
+                </tr>
+            {% endfor %}
+            </table>
+        </div>
+
+        <p style="
+            text-align:center;
+            font-size:11px;
+            color:#9a9a9a;
+            opacity:0.6;
+            margin-top:20px;
+        ">
+            last updated · {{ last_updated }}
+        </p>
+
+        <div class="footer">
+            made for fun, provides none • spotinaz.com
+        </div>
+    </div> <!-- container kapanışı düzeltilmiş -->
+
+    <script>
+    document.querySelectorAll('.readme-card').forEach(card => {
+        card.addEventListener('click', () => {
+            card.classList.toggle('active');
+        });
+    });
+    </script>
+
+</body>
+
     </html>
     """
 
