@@ -3,6 +3,8 @@ import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import os
 from datetime import datetime
+from datetime import timedelta
+
 
 app = Flask(__name__)
 
@@ -89,7 +91,8 @@ def dashboard():
     top_tracks = get_top_tracks()
     recent_tracks = get_recent_tracks()
 
-    last_updated = datetime.now().strftime("%H:%M")
+    last_updated = (datetime.utcnow() + timedelta(hours=3)).strftime("%H:%M")
+
 
 
 
@@ -174,6 +177,9 @@ def dashboard():
 
             <div class="card">
                 <h2>Top 5 Artists</h2>
+                <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px;">
+                    most listened - short term (4 weeks)
+                </p>
                 <table>
                 {% for n, a in top_artists %}
                     <tr><td>{{n}}.</td><td>{{a}}</td></tr>
@@ -183,6 +189,9 @@ def dashboard():
 
             <div class="card">
                 <h2>Top 10 Songs</h2>
+                <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px;">
+                    most listened this week - short term (4 weeks)
+                </p>
                 <table>
                 {% for n, t in top_tracks %}
                     <tr><td>{{n}}.</td><td>{{t}}</td></tr>
@@ -195,9 +204,6 @@ def dashboard():
                     last 5 listens
                 </p>
                 <table>
-                <p style="font-size:11px; opacity:0.6;">
-                    debug count: {{ recent_tracks|length }}
-                </p>
                 {% for n, t, a, time in recent_tracks %}
                     <tr>
                         <td>{{n}}.</td>
