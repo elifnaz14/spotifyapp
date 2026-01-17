@@ -146,6 +146,13 @@ def dashboard():
                     font-size: 1.45em;
                 }
             }
+            .meta {
+                font-size: 11px;
+                opacity: 0.5;
+            }
+            .secondary {
+                opacity: 0.7;
+            }
             .footer {
                 margin-top: 40px;
                 text-align: center;
@@ -235,13 +242,6 @@ def dashboard():
             ">
                 last updated · {{ last_updated }}
             </p>
-            .meta {
-                font-size: 11px;
-                opacity: 0.5;
-            }
-            .secondary {
-                opacity: 0.7;
-            }
             <div class="footer">
                 made for fun, provides none • spotinaz.com
             </div>
