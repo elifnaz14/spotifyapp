@@ -116,8 +116,8 @@ def dashboard():
                 text-transform: uppercase;
             }
             .card.hero {
-                    border: 1px solid rgba(255,255,255,0.25);
-                    transform: scale(1.02);
+                border: 1px solid rgba(255,255,255,0.25);
+                transform: scale(1.02);
             }
             table { width:100% }
             td { padding:4px }
@@ -181,7 +181,7 @@ def dashboard():
                 color: #e0e0e0;
                 border-bottom: 1px solid rgba(255,255,255,0.1);
                 background: rgba(255,255,255,0.02);
-                border-radius: 16px 16px 0 0;
+                border-radius: 12px 12px 0 0;
                 transition: background 0.3s ease;
             }
             .readme-card:hover .readme-header {
