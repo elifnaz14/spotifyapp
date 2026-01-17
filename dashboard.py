@@ -57,12 +57,15 @@ def get_top_tracks(limit=10):
 
 def get_recent_tracks(limit=5):
     try:
+        print("recently played isteniyor...")
         sp = get_spotify_client()
         data = sp.current_user_recently_played(limit=limit)
 
+        print("recent raw data:", data)
+
         tracks = []
         for i, item in enumerate(data["items"]):
-            played_at = item["played_at"]  # ISO string
+            played_at = item["played_at"]
             time_str = datetime.fromisoformat(
                 played_at.replace("Z", "+00:00")
             ).strftime("%H:%M")
@@ -85,6 +88,11 @@ def dashboard():
     track_name, track_artist, track_embed = get_current_track()
     top_artists = get_top_artists()
     top_tracks = get_top_tracks()
+    recent_tracks = get_recent_tracks()
+
+    last_updated = datetime.now().strftime("%H:%M")
+
+
 
     html = """
     <html>
@@ -184,6 +192,9 @@ def dashboard():
             </div>
             <div class="card">
                 <h2>Recently Played</h2>
+                <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px;">
+                    last 5 listens
+                </p>
                 <table>
                 {% for n, t, a, time in recent_tracks %}
                     <tr>
@@ -196,7 +207,15 @@ def dashboard():
                 {% endfor %}
                 </table>
             </div>
-
+            <p style="
+                text-align:center;
+                font-size:11px;
+                color:#9a9a9a;
+                opacity:0.6;
+                margin-top:20px;
+            ">
+                last updated · {{ last_updated }}
+            </p>
             <div class="footer">
                 made for fun, provides none • spotinaz.com
             </div>
@@ -206,13 +225,16 @@ def dashboard():
     """
 
     return render_template_string(
-        html,
-        track_name=track_name,
-        track_artist=track_artist,
-        track_embed=track_embed,
-        top_artists=top_artists,
-        top_tracks=top_tracks,
-    )
+    html,
+    track_name=track_name,
+    track_artist=track_artist,
+    track_embed=track_embed,
+    top_artists=top_artists,
+    top_tracks=top_tracks,
+    recent_tracks=recent_tracks,
+    last_updated=last_updated,
+)
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
