@@ -68,9 +68,11 @@ def get_recent_tracks(limit=5):
         tracks = []
         for i, item in enumerate(data["items"]):
             played_at = item["played_at"]
-            time_str = datetime.fromisoformat(
+            played_time = datetime.fromisoformat(
                 played_at.replace("Z", "+00:00")
-            ).strftime("%H:%M")
+            ) + timedelta(hours=3)
+
+            time_str = played_time.strftime("%H:%M")
 
             tracks.append((
                 i + 1,
