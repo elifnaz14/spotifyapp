@@ -44,10 +44,20 @@ def get_current_track():
             'playing</a>'
         )
         return html_message, "", ""
+    
+@app.route("/current-track")
+def current_track_api():
+    track_name, track_artist, track_embed = get_current_track()
 
-
-
-
+    if track_embed:
+        return {
+            "status": "playing",
+            "embed": track_embed
+        }
+    else:
+        return {
+            "status": "idle"
+        }
 
 def get_top_artists(limit=5):
     try:
@@ -236,7 +246,8 @@ def dashboard():
         <p class="desc">embed hata veriyorsa local/unlisted dinliyorumdur</p>
 
         <div class="card hero">
-            <h2>Currently Playing</h2>
+            <h2>Currently Listening</h2>
+            <div id="current-playing-area">
             {% if track_embed %}
                 <iframe src="{{track_embed}}" width="100%" height="80"
                         frameborder="0" allow="encrypted-media"></iframe>
@@ -250,6 +261,7 @@ def dashboard():
                     </a>
                 </p>
             {% endif %}
+            </div>
         </div>
 
         <div class="card">
@@ -318,15 +330,33 @@ def dashboard():
             made for fun, provides none • spotinaz.com
         </div>
     </div> <!-- container kapanışı düzeltilmiş -->
-
     <script>
     document.querySelectorAll('.readme-card').forEach(card => {
         card.addEventListener('click', () => {
             card.classList.toggle('active');
         });
     });
-    </script>
+    async function refreshCurrentTrack() {
+        const res = await fetch("/current-track");
+        const data = await res.json();
+        const area = document.getElementById("current-playing-area");
 
+        if (data.status === "playing") {
+            area.innerHTML = `
+                <iframe src="${data.embed}" width="100%" height="80"
+                    frameborder="0" allow="encrypted-media"></iframe>
+            `;
+        } else {
+            area.innerHTML = `
+                <p style="font-family:sans-serif; font-size:0.95em; opacity:0.7; margin:0;">
+                    not listening rn
+                </p>
+            `;
+        }
+    }
+
+    setInterval(refreshCurrentTrack, 15000);
+    </script>
 </body>
 
     </html>
