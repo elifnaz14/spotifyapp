@@ -330,28 +330,38 @@ def dashboard():
             made for fun, provides none • spotinaz.com
         </div>
     </div> <!-- container kapanışı düzeltilmiş -->
+    
     <script>
     document.querySelectorAll('.readme-card').forEach(card => {
         card.addEventListener('click', () => {
             card.classList.toggle('active');
         });
     });
+
+    let lastEmbed = null;
+
     async function refreshCurrentTrack() {
         const res = await fetch("/current-track");
         const data = await res.json();
         const area = document.getElementById("current-playing-area");
 
         if (data.status === "playing") {
-            area.innerHTML = `
-                <iframe src="${data.embed}" width="100%" height="80"
-                    frameborder="0" allow="encrypted-media"></iframe>
-            `;
+            if (data.embed !== lastEmbed) {
+                lastEmbed = data.embed;
+                area.innerHTML = `
+                    <iframe src="${data.embed}" width="100%" height="80"
+                        frameborder="0" allow="encrypted-media"></iframe>
+                `;
+            }
         } else {
-            area.innerHTML = `
-                <p style="font-family:sans-serif; font-size:0.95em; opacity:0.7; margin:0;">
-                    not listening rn
-                </p>
-            `;
+            if (lastEmbed !== null) {
+                lastEmbed = null;
+                area.innerHTML = `
+                    <p style="font-family:sans-serif; font-size:0.95em; opacity:0.7; margin:0;">
+                        not listening rn
+                    </p>
+                `;
+            }
         }
     }
 
