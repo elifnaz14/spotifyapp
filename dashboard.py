@@ -210,6 +210,17 @@ def dashboard():
                 padding: 12px 14px;
             }
         </style>
+        <style>
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.85; }
+            100% { opacity: 1; }
+        }
+
+        .playing-pulse {
+            animation: pulse 2.5s ease-in-out infinite;
+        }
+        </style>
     </head>
     <body>
     <div class="container">
