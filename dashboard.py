@@ -204,7 +204,10 @@ def dashboard():
             }
             .readme-card:hover .readme-header {
                 background: rgba(255,255,255,0.05);
-    }
+            }
+            .readme-card:hover {
+                background: rgba(29, 185, 84, 0.08); /* hafif spotify yeşili */
+            }
             .readme-content {
                 max-height: 0;
                 opacity: 0;
@@ -239,11 +242,10 @@ def dashboard():
             Spotify Dashboard of Elif Naz
         </h1>
 
-        <p style="font-style: italic; font-size: 1.1em;">
-            vsco but make it spotify
+        <h2>vsco but make it spotify</h2>
+        <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px; text-transform:uppercase;">
+            used beats rather than filters
         </p>
-        <p class="desc">short term veri anlık cekiliyor, olabildigince</p>
-        <p class="desc">embed hata veriyorsa local/unlisted dinliyorumdur</p>
 
         <div class="card hero">
             <h2>Currently Listening</h2>
