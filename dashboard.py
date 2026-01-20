@@ -308,14 +308,31 @@ def dashboard():
         <div class="card readme-card">
             <div class="readme-header">alakasız linkler</div>
             <div class="readme-content">
-                <p><a href="https://strava.app.link/yP1KWcOj0Zb" target="_blank" style="color:#1DB954;">strava</a></p>
-                <p><a href="https://open.spotify.com/user/yk69xlqfyypx701kxqnbhb3v4" target="_blank" style="color:#1DB954;">spotify</a></p>
-                <p><a href="https://lichess-damage-report-f5e4b5271a78.herokuapp.com" target="_blank" style="color:#1DB954;">lichess</a></p>
-                <p><a href="https://www.linkedin.com/in/elif-naz-mutlu-634915216/" target="_blank" style="color:#1DB954;">linkedin</a></p>
-                <p><a href="https://github.com/elifnaz14" target="_blank" style="color:#1DB954;">github</a></p>
+                <p>
+                    <a href="https://strava.app.link/yP1KWcOj0Zb" target="_blank" style="color:#1DB954;">strava</a>
+                    <span style="opacity:0.6; font-size:0.85em; font-style:italic;">my strava profile</span>
+                </p>
+                <p>
+                    <a href="https://open.spotify.com/user/yk69xlqfyypx701kxqnbhb3v4" target="_blank" style="color:#1DB954;">spotify</a>
+                    <span style="opacity:0.6; font-size:0.85em; font-style:italic;">my spotify profile</span>
+                </p>
+                <p>
+                    <a href="https://lichess-damage-report-f5e4b5271a78.herokuapp.com" target="_blank" style="color:#1DB954;">lichess</a>
+                    <span style="opacity:0.6; font-size:0.85em; font-style:italic;">personalized lichess damage reports</span>
+                </p>
+                <p>
+                    <a href="https://www.linkedin.com/in/elif-naz-mutlu-634915216/" target="_blank" style="color:#1DB954;">linkedin</a>
+                    <span style="opacity:0.6; font-size:0.85em; font-style:italic;">my linkedin profile</span>
+                </p>
+                <p>
+                    <a href="https://chess-opening-voter-eae5031085b9.herokuapp.com/vote/AhU6sId2" target="_blank" style="color:#1DB954;">vote</a>
+                    <span style="opacity:0.6; font-size:0.85em; font-style:italic;">chess openings ranker</span>
+                </p>
+                <p>
+                    <a href="https://github.com/elifnaz14" target="_blank" style="color:#1DB954;">github</a>
+                    <span style="opacity:0.6; font-size:0.85em; font-style:italic;">my github profile</span>
+                </p>
             </div>
-        </div>
-
         <p style="
             text-align:center;
             font-size:11px;
@@ -329,7 +346,7 @@ def dashboard():
         <div class="footer">
             made for fun, provides none • spotinaz.com
         </div>
-    </div> <!-- container kapanışı düzeltilmiş -->
+    </div> 
     
     <script>
     document.querySelectorAll('.readme-card').forEach(card => {
