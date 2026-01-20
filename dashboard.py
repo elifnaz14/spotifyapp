@@ -333,6 +333,8 @@ def dashboard():
                     <span style="opacity:0.6; font-size:0.85em; font-style:italic;">my github profile</span>
                 </p>
             </div>
+        </div> 
+
         <p style="
             text-align:center;
             font-size:11px;
@@ -346,7 +348,7 @@ def dashboard():
         <div class="footer">
             made for fun, provides none • spotinaz.com
         </div>
-    </div> 
+
     
     <script>
     document.querySelectorAll('.readme-card').forEach(card => {
