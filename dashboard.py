@@ -242,8 +242,10 @@ def dashboard():
             Spotify Dashboard of Elif Naz
         </h1>
 
-        <h2>vsco but make it spotify</h2>
-        <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px; text-transform:uppercase;">
+        <p class="desc" style="text-transform: uppercase; opacity: 0.55; font-size: 0.75rem; letter-spacing: 1px; margin-top:0; margin-bottom:6px;">
+            vsco but make it spotify
+        </p>
+        <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px;">
             used beats rather than filters
         </p>
 
