@@ -234,6 +234,16 @@ def dashboard():
             animation: pulse 2.5s ease-in-out infinite;
         }
         </style>
+
+        <!-- Google tag (gtag.js) -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-K5K6CCE7CS"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-K5K6CCE7CS');
+        </script>
     </head>
     <body>
     <div class="container">
