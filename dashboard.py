@@ -323,7 +323,7 @@ def dashboard():
             <div class="readme-header">alakasız linkler</div>
             <div class="readme-content">
                 <p>
-                    <a href="https://strava.app.link/yP1KWcOj0Zb" target="_blank" style="color:#1DB954;">strava</a>
+                    <a href="https://strava.app.link/yP1KWcOj0Zb" target="_blank" style="color:#FC5200;">strava</a>
                     <span style="opacity:0.6; font-size:0.85em; font-style:italic;">my strava profile</span>
                 </p>
                 <p>
