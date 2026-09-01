@@ -106,10 +106,11 @@ def get_recent_tracks(limit=5):
 
 VALID_RANGES = {"short_term", "medium_term", "long_term"}
 RANGE_LABELS = {
-    "short_term": "son 4 hafta",
-    "medium_term": "son 6 ay",
-    "long_term": "tüm zamanlar"
+    "short_term": "last 4 weeks",
+    "medium_term": "last 6 months",
+    "long_term": "all time"
 }
+
 
 @app.route("/")
 def dashboard():
@@ -311,19 +312,13 @@ def dashboard():
             {% endif %}
             </div>
         </div>
-                <div class="card hero">
-            <h2>Currently Listening</h2>
-            ...
-        </div>
 
         <div class="tabs">
-            <a href="/?time_range=short_term" class="tab {{ 'active' if current_range == 'short_term' }}">4 Hafta</a>
-            <a href="/?time_range=medium_term" class="tab {{ 'active' if current_range == 'medium_term' }}">6 Ay</a>
-            <a href="/?time_range=long_term" class="tab {{ 'active' if current_range == 'long_term' }}">Tüm Zamanlar</a>
+            <a href="/?time_range=short_term" class="tab {{ 'active' if current_range == 'short_term' }}">last 4 weeks</a>
+            <a href="/?time_range=medium_term" class="tab {{ 'active' if current_range == 'medium_term' }}">last 6 months</a>
+            <a href="/?time_range=long_term" class="tab {{ 'active' if current_range == 'long_term' }}">all time</a>
         </div>
 
-        <div class="card">
-            <h2>Top 5 Artists</h2>
         <div class="card">
             <h2>Top 5 Artists</h2>
             <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px;">
