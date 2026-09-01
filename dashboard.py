@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string
+from flask import Flask, render_template_string, request
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import os
@@ -59,18 +59,18 @@ def current_track_api():
             "status": "idle"
         }
 
-def get_top_artists(limit=5):
+def get_top_artists(limit=5, time_range="short_term"):
     try:
         sp = get_spotify_client()
-        data = sp.current_user_top_artists(limit=limit, time_range="short_term")
+        data = sp.current_user_top_artists(limit=limit, time_range=time_range)
         return [(i + 1, a["name"]) for i, a in enumerate(data["items"])]
     except:
         return []
 
-def get_top_tracks(limit=10):
+def get_top_tracks(limit=10, time_range="short_term"):
     try:
         sp = get_spotify_client()
-        data = sp.current_user_top_tracks(limit=limit, time_range="short_term")
+        data = sp.current_user_top_tracks(limit=limit, time_range=time_range)
         return [(i + 1, t["name"]) for i, t in enumerate(data["items"])]
     except:
         return []
@@ -104,11 +104,22 @@ def get_recent_tracks(limit=5):
         print("recent error:", e)
         return []
 
+VALID_RANGES = {"short_term", "medium_term", "long_term"}
+RANGE_LABELS = {
+    "short_term": "son 4 hafta",
+    "medium_term": "son 6 ay",
+    "long_term": "tüm zamanlar"
+}
+
 @app.route("/")
 def dashboard():
+    time_range = request.args.get("time_range", "short_term")
+    if time_range not in VALID_RANGES:
+        time_range = "short_term"
+
     track_name, track_artist, track_embed = get_current_track()
-    top_artists = get_top_artists()
-    top_tracks = get_top_tracks()
+    top_artists = get_top_artists(time_range=time_range)
+    top_tracks = get_top_tracks(time_range=time_range)
     recent_tracks = get_recent_tracks()
 
     last_updated = (datetime.utcnow() + timedelta(hours=3)).strftime("%H:%M")
@@ -179,6 +190,29 @@ def dashboard():
                 font-size: 11px;
                 color: #9a9a9a;
                 opacity: 0.6;
+            }
+                        .tabs {
+                display: flex;
+                gap: 8px;
+                margin: 20px 0 -6px;
+            }
+            .tab {
+                flex: 1;
+                text-align: center;
+                padding: 8px 0;
+                border-radius: 8px;
+                font-size: 12px;
+                text-decoration: none;
+                color: #cfcfcf;
+                background: rgba(255,255,255,0.05);
+                border: 1px solid rgba(255,255,255,0.08);
+                transition: all 0.2s ease;
+            }
+            .tab.active {
+                background: rgba(29,185,84,0.15);
+                color: #1DB954;
+                border-color: #1DB954;
+                font-weight: 600;
             }
             .readme-card {
                 cursor: pointer;
@@ -277,11 +311,23 @@ def dashboard():
             {% endif %}
             </div>
         </div>
+                <div class="card hero">
+            <h2>Currently Listening</h2>
+            ...
+        </div>
+
+        <div class="tabs">
+            <a href="/?time_range=short_term" class="tab {{ 'active' if current_range == 'short_term' }}">4 Hafta</a>
+            <a href="/?time_range=medium_term" class="tab {{ 'active' if current_range == 'medium_term' }}">6 Ay</a>
+            <a href="/?time_range=long_term" class="tab {{ 'active' if current_range == 'long_term' }}">Tüm Zamanlar</a>
+        </div>
 
         <div class="card">
             <h2>Top 5 Artists</h2>
+        <div class="card">
+            <h2>Top 5 Artists</h2>
             <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px;">
-                most listened - short term (4 weeks)
+                most listened - {{ range_label }}
             </p>
             <table>
             {% for n, a in top_artists %}
@@ -293,7 +339,7 @@ def dashboard():
         <div class="card">
             <h2>Top 10 Songs</h2>
             <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:8px;">
-                most listened - short term (4 weeks)
+                most listened - {{ range_label }}
             </p>
             <table>
             {% for n, t in top_tracks %}
@@ -414,6 +460,8 @@ def dashboard():
     top_tracks=top_tracks,
     recent_tracks=recent_tracks,
     last_updated=last_updated,
+    current_range=time_range,
+    range_label=RANGE_LABELS[time_range],
 )
 
 
