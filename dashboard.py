@@ -380,8 +380,8 @@ def dashboard():
                     <span style="opacity:0.6; font-size:0.85em; font-style:italic;">my linkedin profile</span>
                 </p>
                 <p>
-                    <a href="https://chess-opening-voter-eae5031085b9.herokuapp.com/vote/AhU6sId2" target="_blank" style="color:#1DB954;">vote</a>
-                    <span style="opacity:0.6; font-size:0.85em; font-style:italic;">chess openings ranker</span>
+                    <a href="https://go2mid.com" target="_blank" style="color:#1DB954;">go2mid.com</a>
+                    <span style="opacity:0.6; font-size:0.85em; font-style:italic;">start from the midgame</span>
                 </p>
                 <p>
                     <a href="https://github.com/elifnaz14" target="_blank" style="color:#1DB954;">github</a>
