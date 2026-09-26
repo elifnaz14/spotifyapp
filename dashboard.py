@@ -1,6 +1,7 @@
 from flask import Flask, render_template_string, request
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+import json
 import os
 from datetime import datetime
 from datetime import timedelta
@@ -8,9 +9,9 @@ from datetime import timedelta
 
 app = Flask(__name__)
 
-CLIENT_ID = os.environ.get("9f51e301cf594158b80107b2b4bf54ce")
-CLIENT_SECRET = os.environ.get("ff7a063fc03c4086a05f1a05f511fa40")
-REFRESH_TOKEN = os.environ.get("SPOTIFY_REFRESH_TOKEN")
+CLIENT_ID = os.environ.get("SPOTIFY_CLIENT_ID") or os.environ.get("9f51e301cf594158b80107b2b4bf54ce") or "9f51e301cf594158b80107b2b4bf54ce"
+CLIENT_SECRET = os.environ.get("SPOTIFY_CLIENT_SECRET") or os.environ.get("ff7a063fc03c4086a05f1a05f511fa40") or "bce0ae1bc6f04a2eb5975774a942e57b"
+REFRESH_TOKEN = os.environ.get("SPOTIFY_REFRESH_TOKEN") or "AQBleAjlzWYAUy0twq4eYgyOHRTwfhSkHWoGYANgRsygpsjrEcjl3nsnlFQnJUqR7UV8d_jzF3j5_vNOUJgDM7bzkmiDp_UNiCrH41J3B_t7v_49MEvLlW3zRPk5Lvs0ZCU"
 
 SCOPE = "user-read-recently-played user-top-read user-read-playback-state"
 
@@ -104,6 +105,32 @@ def get_recent_tracks(limit=5):
         print("recent error:", e)
         return []
 
+_timeline_cache = {"timestamp": None, "data": None}
+
+def get_timeline_data():
+    now = datetime.utcnow()
+    if _timeline_cache["data"] and _timeline_cache["timestamp"]:
+        if (now - _timeline_cache["timestamp"]).total_seconds() < 300:
+            return _timeline_cache["data"]
+
+    try:
+        sp = get_spotify_client()
+        if not sp:
+            return _timeline_cache.get("data") or {}
+
+        timeline = {}
+        for term in ["long_term", "medium_term", "short_term"]:
+            res = sp.current_user_top_artists(limit=10, time_range=term)
+            timeline[term] = [{"rank": i + 1, "name": a["name"]} for i, a in enumerate(res.get("items", []))]
+
+        _timeline_cache["data"] = timeline
+        _timeline_cache["timestamp"] = now
+        return timeline
+    except Exception as e:
+        print("[Spotinaz] Timeline fetch error:", e)
+        return _timeline_cache.get("data") or {}
+
+
 VALID_RANGES = {"short_term", "medium_term", "long_term"}
 RANGE_LABELS = {
     "short_term": "last 4 weeks",
@@ -122,6 +149,7 @@ def dashboard():
     top_artists = get_top_artists(time_range=time_range)
     top_tracks = get_top_tracks(time_range=time_range)
     recent_tracks = get_recent_tracks()
+    timeline_data = get_timeline_data()
 
     last_updated = (datetime.utcnow() + timedelta(hours=3)).strftime("%H:%M")
 
@@ -257,6 +285,127 @@ def dashboard():
                 opacity: 1;
                 padding: 12px 14px;
             }
+
+            /* Minimal 2D Timeline */
+            .timeline-card {
+                user-select: none;
+            }
+            .timeline-2d {
+                position: relative;
+                height: 220px;
+                background: #161616;
+                border-radius: 8px;
+                border: 1px solid rgba(255, 255, 255, 0.06);
+                overflow: hidden;
+                margin-bottom: 14px;
+                cursor: ew-resize;
+            }
+            .timeline-2d::before {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: rgba(255, 255, 255, 0.03);
+                pointer-events: none;
+            }
+            .timeline-y-guide {
+                position: absolute;
+                left: 8px;
+                font-size: 9px;
+                letter-spacing: 0.5px;
+                text-transform: uppercase;
+                color: rgba(255, 255, 255, 0.18);
+                font-family: monospace;
+                pointer-events: none;
+                z-index: 1;
+            }
+            .timeline-y-guide.top { top: 8px; }
+            .timeline-y-guide.mid { top: calc(50% - 6px); }
+            .timeline-y-guide.bot { bottom: 8px; }
+
+            .t-node {
+                position: absolute;
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-size: 11px;
+                white-space: nowrap;
+                color: #cfcfcf;
+                background: rgba(255, 255, 255, 0.04);
+                border: 1px solid rgba(255, 255, 255, 0.07);
+                transform: translate(-50%, -50%);
+                transition: top 0.28s cubic-bezier(0.2, 0.8, 0.3, 1), opacity 0.25s ease, border-color 0.2s ease, background 0.2s ease;
+                pointer-events: none;
+            }
+            .t-node.rank-1 {
+                color: #ffffff;
+                font-weight: 600;
+                border-color: rgba(29, 185, 84, 0.4);
+                background: rgba(29, 185, 84, 0.12);
+                z-index: 3;
+            }
+            .t-node.rank-top {
+                color: #ffffff;
+                border-color: rgba(255, 255, 255, 0.16);
+                z-index: 2;
+            }
+            .t-node .t-rank {
+                font-size: 9.5px;
+                color: rgba(255, 255, 255, 0.35);
+                margin-right: 4px;
+                font-family: monospace;
+            }
+            .t-node.rank-1 .t-rank {
+                color: #1DB954;
+                opacity: 1;
+            }
+
+            .timeline-controls {
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+            }
+            .timeline-scrubber {
+                -webkit-appearance: none;
+                width: 100%;
+                height: 3px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 2px;
+                outline: none;
+                cursor: pointer;
+                margin: 4px 0;
+            }
+            .timeline-scrubber::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: #1DB954;
+                cursor: pointer;
+                transition: transform 0.1s ease;
+            }
+            .timeline-scrubber::-webkit-slider-thumb:hover {
+                transform: scale(1.3);
+            }
+            .timeline-ticks {
+                display: flex;
+                justify-content: space-between;
+                font-size: 11px;
+                color: #777;
+            }
+            .timeline-ticks .tick {
+                cursor: pointer;
+                transition: color 0.15s ease;
+            }
+            .timeline-ticks .tick:hover {
+                color: #ccc;
+            }
+            .timeline-ticks .tick.active {
+                color: #1DB954;
+                font-weight: 500;
+            }
         </style>
         <style>
         @keyframes pulse {
@@ -310,6 +459,29 @@ def dashboard():
                     </a>
                 </p>
             {% endif %}
+            </div>
+        </div>
+
+        <div class="card timeline-card">
+            <h2>timeline</h2>
+            <p style="font-size:11px; opacity:0.55; margin-top:-6px; margin-bottom:12px;">
+                drag to see artist frequency across time
+            </p>
+
+            <div class="timeline-2d" id="timeline-2d">
+                <div class="timeline-y-guide top">frequent</div>
+                <div class="timeline-y-guide mid">moderate</div>
+                <div class="timeline-y-guide bot">occasional</div>
+                <div id="timeline-nodes"></div>
+            </div>
+
+            <div class="timeline-controls">
+                <input type="range" id="timeline-range" min="0" max="2" step="0.01" value="2" class="timeline-scrubber">
+                <div class="timeline-ticks">
+                    <span class="tick" data-val="0">all time</span>
+                    <span class="tick" data-val="1">last 6 months</span>
+                    <span class="tick active" data-val="2">last 4 weeks</span>
+                </div>
             </div>
         </div>
 
@@ -412,6 +584,141 @@ def dashboard():
         });
     });
 
+    // 2D Timeline Engine
+    const timelineData = {{ timeline_json|safe }};
+    const nodesContainer = document.getElementById("timeline-nodes");
+    const slider = document.getElementById("timeline-range");
+    const ticks = document.querySelectorAll(".timeline-ticks .tick");
+    const canvas = document.getElementById("timeline-2d");
+
+    if (timelineData && Object.keys(timelineData).length > 0 && nodesContainer && slider) {
+        const artistMap = {};
+        const terms = ["long_term", "medium_term", "short_term"];
+        
+        terms.forEach(term => {
+            (timelineData[term] || []).forEach(item => {
+                if (!artistMap[item.name]) {
+                    artistMap[item.name] = { long_term: null, medium_term: null, short_term: null };
+                }
+                artistMap[item.name][term] = item.rank;
+            });
+        });
+
+        const artistNames = Object.keys(artistMap);
+        const totalCols = 4;
+        const colWidth = 100 / totalCols;
+
+        const domNodes = {};
+        artistNames.forEach((name, idx) => {
+            const el = document.createElement("div");
+            el.className = "t-node";
+            el.innerHTML = '<span class="t-rank"></span>' + name;
+            nodesContainer.appendChild(el);
+            
+            const col = idx % totalCols;
+            const xPercent = (col * colWidth) + (colWidth / 2);
+            domNodes[name] = {
+                el: el,
+                rankEl: el.querySelector(".t-rank"),
+                x: xPercent,
+                ranks: artistMap[name]
+            };
+        });
+
+        function renderTimeline(v) {
+            let eraA, eraB, f;
+            if (v <= 1) {
+                eraA = "long_term";
+                eraB = "medium_term";
+                f = v;
+            } else {
+                eraA = "medium_term";
+                eraB = "short_term";
+                f = v - 1;
+            }
+
+            const activeStep = Math.round(v);
+            ticks.forEach(t => {
+                t.classList.toggle("active", parseInt(t.dataset.val) === activeStep);
+            });
+
+            artistNames.forEach(name => {
+                const node = domNodes[name];
+                const rA = node.ranks[eraA] !== null ? node.ranks[eraA] : 13;
+                const rB = node.ranks[eraB] !== null ? node.ranks[eraB] : 13;
+
+                const rank = rA * (1 - f) + rB * f;
+
+                if (rank > 11.2) {
+                    node.el.style.opacity = "0";
+                    node.el.style.top = "115%";
+                    node.el.style.left = node.x + "%";
+                } else {
+                    const roundedRank = Math.max(1, Math.min(10, Math.round(rank)));
+                    const yPercent = 14 + (rank - 1) * 7.2;
+                    const opacity = Math.max(0, Math.min(1, (11.5 - rank) / 3.5));
+
+                    node.el.style.opacity = opacity.toFixed(2);
+                    node.el.style.top = yPercent.toFixed(1) + "%";
+                    node.el.style.left = node.x + "%";
+                    node.rankEl.textContent = roundedRank + ".";
+
+                    node.el.classList.toggle("rank-1", roundedRank === 1);
+                    node.el.classList.toggle("rank-top", roundedRank <= 3 && roundedRank > 1);
+                }
+            });
+        }
+
+        slider.addEventListener("input", () => {
+            renderTimeline(parseFloat(slider.value));
+        });
+
+        ticks.forEach(t => {
+            t.addEventListener("click", () => {
+                const target = parseFloat(t.dataset.val);
+                animateSlider(target);
+            });
+        });
+
+        let isDragging = false;
+        function onDrag(clientX) {
+            const rect = canvas.getBoundingClientRect();
+            let ratio = (clientX - rect.left) / rect.width;
+            ratio = Math.max(0, Math.min(1, ratio));
+            const val = ratio * 2;
+            slider.value = val;
+            renderTimeline(val);
+        }
+
+        canvas.addEventListener("mousedown", (e) => { isDragging = true; onDrag(e.clientX); });
+        window.addEventListener("mousemove", (e) => { if (isDragging) onDrag(e.clientX); });
+        window.addEventListener("mouseup", () => { isDragging = false; });
+        canvas.addEventListener("touchstart", (e) => { isDragging = true; onDrag(e.touches[0].clientX); }, { passive: true });
+        window.addEventListener("touchmove", (e) => { if (isDragging) onDrag(e.touches[0].clientX); }, { passive: true });
+        window.addEventListener("touchend", () => { isDragging = false; });
+
+        function animateSlider(targetVal) {
+            let current = parseFloat(slider.value);
+            const step = (targetVal - current) / 10;
+            let count = 0;
+            function anim() {
+                count++;
+                current += step;
+                if (count >= 10 || Math.abs(current - targetVal) < 0.03) {
+                    slider.value = targetVal;
+                    renderTimeline(targetVal);
+                } else {
+                    slider.value = current;
+                    renderTimeline(current);
+                    requestAnimationFrame(anim);
+                }
+            }
+            requestAnimationFrame(anim);
+        }
+
+        renderTimeline(2);
+    }
+
     let lastEmbed = null;
 
     async function refreshCurrentTrack() {
@@ -457,6 +764,7 @@ def dashboard():
     last_updated=last_updated,
     current_range=time_range,
     range_label=RANGE_LABELS[time_range],
+    timeline_json=json.dumps(timeline_data),
 )
 
 
